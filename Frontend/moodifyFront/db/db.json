@@ -1,0 +1,72 @@
+[{
+    "id": 1,
+    "title": "Ref:rain",
+    "artist": "Aimer",
+    "lyrics": "",
+    "year": 2019,
+    "genre": [
+        {
+            "id": 4,
+            "name": "Pop"
+        }
+    ],
+    "user": 1,
+    "cover": "http://127.0.0.1:8000/media/cover_pics/refrain_cover.jpg",
+    "song_file": "http://127.0.0.1:8000/media/songs/Ref_rain_-_Aimer.mp3"
+},
+{
+    "id": 2,
+    "title": "Lemon",
+    "artist": "Kenshi Yonezu",
+    "lyrics": "",
+    "year": 2018,
+    "genre": [
+        {
+            "id": 4,
+            "name": "Pop"
+        },
+        {
+            "id": 5,
+            "name": "Indie"
+        }
+    ],
+    "user": 1,
+    "cover": "http://127.0.0.1:8000/media/media/cover_pics/lemon.jpg",
+    "song_file": "http://127.0.0.1:8000/media/media/songs/Lemon_-_Kenshi_Yonezu.mp3"
+},
+{
+    "id": 3,
+    "title": "Sincerely",
+    "artist": "TRUE",
+    "lyrics": "\"\"",
+    "year": 2018,
+    "genre": [
+        {
+            "id": 4,
+            "name": "Pop"
+        }
+    ],
+    "user": 1,
+    "cover": "http://127.0.0.1:8000/media/media/cover_pics/Sincerely_yei8dNq.jpg",
+    "song_file": "http://127.0.0.1:8000/media/media/songs/Sincerely_-_TRUE_lL1DJfe.mp3"
+},
+{
+    "id": 10,
+    "title": "Grace Note (グレースノート)",
+    "artist": "Aimer",
+    "lyrics": "",
+    "year": 2022,
+    "genre": [
+        {
+            "id": 1,
+            "name": "Blue"
+        },
+        {
+            "id": 4,
+            "name": "Pop"
+        }
+    ],
+    "user": 1,
+    "cover": "http://127.0.0.1:8000/media/media/cover_pics/Aimer-Grace-Note.jpg",
+    "song_file": "http://127.0.0.1:8000/media/media/songs/Grace_Note_-_Aimer.mp3"
+}]
