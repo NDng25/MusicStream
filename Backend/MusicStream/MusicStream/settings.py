@@ -26,12 +26,13 @@ SECRET_KEY = '^o-n4(_*v_)jfcu=*g=#wjje87hve5bef4g=%6v9@r$!@y4cme'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1',]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'django_cleanup.apps.CleanupConfig',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -111,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
        'http://localhost:3000',

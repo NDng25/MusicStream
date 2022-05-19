@@ -28,7 +28,7 @@ class ListSongsView(APIView):
             img = request.FILES['cover']
             if img.content_type not in ['image/jpeg', 'image/png']:
                 raise Exception('File type not supported')
-            if img.size > 1024*1024*2:
+            if img.size > 1024*1024*10:
                 raise Exception('File size too large')
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -38,10 +38,10 @@ class ListSongsView(APIView):
             song_file = request.FILES['song_file']
             if song_file.content_type not in ['audio/mpeg', 'audio/mp3']:
                 raise Exception("Invalid file type")
-            if song_file.size > 1024*1024*5:
+            if song_file.size > 1024*1024*20:
                 raise Exception("File too large")
-            if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
-                raise Exception("Invalid file type")
+            # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
+            #     raise Exception("Invalid file type")
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         data['user'] = User.objects.filter(id=user_id).first().id
@@ -58,7 +58,7 @@ class ListSongsView(APIView):
 
 class SongDetailView(APIView):
     """
-    Retrieve, update or delete a snippet instance.
+    Retrieve, update or delete a song.
     """
     def get_object(self, pk):
         try:
@@ -67,16 +67,45 @@ class SongDetailView(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
-        if request.user.is_authenticated:
+        # if request.user.is_authenticated:
             snippet = self.get_object(pk)
             serializer = SongSerializer(snippet, context={'request': request})
             return Response(serializer.data)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # else:
+            # return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk, format=None):
         snippet = self.get_object(pk)
-        serializer = SongSerializer(snippet, data=request.data)
+        data = request.data.copy()
+        genre_ids = list(map(int, data['genre'].split(',')))
+        #keep old cover file if not have the new one
+        if data['cover'] is not None:
+            data['cover'] = snippet.cover
+        else:
+            try:
+                img = request.FILES['cover']
+                if img.content_type not in ['image/jpeg', 'image/png']:
+                    raise Exception('File type not supported')
+                if img.size > 1024*1024*10:
+                    raise Exception('File size too large')
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+        #keep song file if not have the new one
+        if data['song_file'] is not None:
+            data['song_file'] = snippet.song_file
+        else:
+            try:
+                song_file = request.FILES['song_file']
+                if song_file.content_type not in ['audio/mpeg', 'audio/mp3']:
+                    raise Exception("Invalid file type")
+                if song_file.size > 1024*1024*20:
+                    raise Exception("File too large")
+                # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
+                #     raise Exception("Invalid file type")
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(data)
+        serializer = SongSerializer(instance=snippet, data=request.data, context={'genre':genre_ids,'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
