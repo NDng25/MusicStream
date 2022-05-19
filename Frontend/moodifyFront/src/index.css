@@ -73,14 +73,24 @@ input:focus {
 }
 
 .nav-btn {
+    
     width: 130px;
     height: 130px;
     border-radius: 5px;
     cursor: pointer;
     background-color: rgb(196, 196, 196, 0.15);
     transition: 0.3s;
+    
 }
-
+.nav-btn1 {
+    display: flex;
+    width: 100%;
+    height: 100px;
+    border-radius: 5px;
+    margin: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 .nav-btn img {
     height: 130px;
     width: 130px;
@@ -159,7 +169,46 @@ button:hover {
     background-color: rgb(196, 196, 196, 0.55);
     transition: 0.3s;
 }
+.posi{
+    position:fixed;
+}
+.mar_left{
+    margin-left: 15%;
+}
+.mg{
+    margin: 30px;
+}
+.w80{
+    width: 80px;
+}
+.w80pt{
+    width:92%;
+    margin-right: 80px;
+}
+.w300{
+    width:300px;
+}
+.dflex{
+    display:flex;
+    height:50px;
+}
+.log:hover{
+    color:white;
+    cursor: pointer; 
+}
+.glow-on-hover{
+    height: 50px;
+    border: 1px solid white;
+    border-radius: 10px;
+}
+.glow-on-hover:hover{
+    border: 1px solid blue;
+    color: blue;
+}
 
+.item:hover{
+    text-decoration: none;
+}
 #mood-div {
     height: auto;
     width: 200px;
