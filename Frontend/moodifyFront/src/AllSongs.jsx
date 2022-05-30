@@ -11,9 +11,11 @@ function AllSongs({
   playMusic,
   // Webcam,
   // fetchMusic,
+  
 }) {
   const [username, setUsername] = useState("username");
 
+    
   return (
     <>
       {/* songs */}
@@ -45,6 +47,9 @@ function AllSongs({
                     </div>
                     <div  className="w300">
                       <p  className="w100 mg">{song.artist.slice(0, 15)} </p>
+                    </div>
+                    <div  className="w300">
+                        <i className="fas fa-heart mg" ></i>
                     </div>
                     <div  className="w300">
                     <a claclassNamess="" onclick="" title="Add to Playlist"> <i

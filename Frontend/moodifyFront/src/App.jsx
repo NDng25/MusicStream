@@ -12,6 +12,7 @@ import MainApp from "./MainApp";
 import Playlist from "./Playlist";
 import AllSongs from "./AllSongs";
 import MyMusic from "./MyMusic";
+import Favourite from "./Favourite";
 
 export const BASE_URL = "http://127.0.0.1:8000";
 
@@ -163,6 +164,16 @@ function App() {
                   </div>
                 </div>
               </NavLink>
+              <NavLink to="/favourite/" activeClassName="active" exact>
+                <div>
+                  <div>
+                    <span>
+                      <i className="fas fa-heart"></i>
+                    </span>{" "}
+                    Favourite
+                  </div>
+                </div>
+              </NavLink>
               <NavLink to="/mymusic/" activeClassName="active" exact>
                 <div>
                   <div>
@@ -183,16 +194,34 @@ function App() {
                   </div>
                 </div>
               </NavLink>
-              <NavLink to="/addplaylist/"  exact>
-                <div>
-                  <div className="glow-on-hover ">
-                    <a >
-                      <i className="fas fa-plus"></i>
-                    New Playlist
-                    </a>{" "}
-                  </div>
+              <div className="" >
+                  <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>
+              
+                  
+                   <div id="addPlaylist" class="modal fade">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                      <form>
+                      <div class="modal-header">						
+                              <h4 class="modal-title">Create Playlist</h4>
+                              <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      </div>
+                      <div class="modal-body">					
+                              <div class="form-group">
+                                <label>Your New Playlist Name</label>
+                                <input type="text" class="form-control" required/>	
+                                </div>
+                      </div>
+                      <div class="modal-footer">
+                              <input type="submit" class="btn btn-success" value="Create Playlist"/>
+                      </div>
+                    </form>
+                      </div>
+                    </div>
+                  </div>  
                 </div>
-              </NavLink>
+              
+                
 
               <div onClick={() => logout()}>
                 <div>{localStorage.getItem("token") && "Logout"}</div>
@@ -228,11 +257,19 @@ function App() {
               playMusic={playMusic}
             />
           </Route>
-          <Route path="/mymusic" exact>
-            <MyMusic
+          <Route path="/favourite" >
+            <Favourite
             />
           </Route>
-          <Route path="/playlist" exact>
+          <Route path="/mymusic" exact>
+            <MyMusic
+            mood={mood}
+            audioList={audioList}
+            apiAudioList={apiAudioList}
+            playMusic={playMusic}
+            />
+          </Route>
+          <Route path="/playlist" >
             <Playlist
             />
           </Route>
