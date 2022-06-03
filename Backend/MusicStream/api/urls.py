@@ -9,5 +9,6 @@ from .views import *
 urlpatterns = [
     path('songs/', ListSongsView.as_view()),
     path('songs/<int:pk>/', SongDetailView.as_view()),
+    path('genres/', ListGenreView.as_view()),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

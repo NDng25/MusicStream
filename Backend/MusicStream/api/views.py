@@ -1,9 +1,11 @@
 from multiprocessing import context
+from typing import Generic
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from rest_framework.views import Response, APIView, status
 from rest_framework import viewsets
 from rest_framework import generics ,filters, permissions
+from rest_framework.generics import *
 from rest_framework.parsers import FileUploadParser
 # from PIL import Image
 from musicapp.models import *
@@ -115,3 +117,11 @@ class SongDetailView(APIView):
         snippet = self.get_object(pk)
         snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListGenreView(APIView):
+    def get(self, request, format=None):
+        genres = Genre.objects.all()
+        serializers = GenreSerializer(genres, many=True)
+        return Response(serializers.data)
+

@@ -32,15 +32,17 @@ function MainApp({
   //   catch(err){
   //     console.log(err);
   //   }
-    
   // }, []);
   return (
     <>
       {/* songs */}
-      <div className="p-5 w-85">
+      <div className="p-5 w-85 mar_left">
         {/* Search box */}
-        <div>
-          <input type="search" placeholder="Search Music (in progress)" />
+        <div className=" dflex">
+          <input className="w80pt" type="search" placeholder="Search Music (in progress)" />
+          <div className="log" onClick="">
+            <h2 className="mb-3">Logout</h2>
+          </div>
         </div>
 
         {/* song squares */}
@@ -92,6 +94,69 @@ function MainApp({
           </div>
         </div>
 
+       { /* Trending Songs  */ }
+        <div >
+        <h2 className="mt-5 mb-3">Trending Songs</h2>
+        </div>
+        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
+        <div className="circle" onClick={() => prev()}>
+            <i className="fas fa-arrow-left"></i>
+          </div>
+        {
+        audioList.map((song) => {
+                return (
+                  console.log(song),
+                  <div
+                    key={song.id}
+                    className="nav-btn"
+                    onClick={() => playMusic(song)}
+                  >
+                    <div>
+                      <img src={song.cover} className="mw-100" alt="song-cover" />
+                    </div>
+                    <div>
+                      <p>{song.name.slice(0, 15)}</p>
+                    </div>
+                  </div>
+                );
+              })
+            }
+            <div className="circle" onClick={() => next()}>
+            <i className="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        { /* Other Hits */ }
+        <div >
+        <h2 className="mt-5 mb-3">Other Hits</h2>
+        </div>
+        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
+        <div className="circle" onClick={() => prev()}>
+            <i className="fas fa-arrow-left"></i>
+          </div>
+        {
+        audioList.map((song) => {
+                return (
+                  console.log(song),
+                  <div
+                    key={song.id}
+                    className="nav-btn"
+                    onClick={() => playMusic(song)}
+                  >
+                    <div>
+                      <img src={song.cover} className="mw-100" alt="song-cover" />
+                    </div>
+                    <div>
+                      <p>{song.name.slice(0, 15)}</p>
+                    </div>
+                  </div>
+                );
+              })
+            }
+            <div className="circle" onClick={() => next()}>
+            <i className="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
         {/* webcam and list */}
         {/* <h2 className="mt-5">Songs based on your mood</h2> */}
         {/* <div className="d-flex justify-content-between mt-3 w-100"> */}
