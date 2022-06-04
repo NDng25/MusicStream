@@ -1,12 +1,10 @@
-from multiprocessing import context
-from typing import Generic
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from matplotlib.style import context
 from rest_framework.views import Response, APIView, status
-from rest_framework import viewsets
-from rest_framework import generics ,filters, permissions
 from rest_framework.generics import *
 from rest_framework.parsers import FileUploadParser
+from rest_framework.pagination import LimitOffsetPagination
+from django_filters.rest_framework import DjangoFilterBackend
 # from PIL import Image
 from musicapp.models import *
 from .serializers import *
@@ -14,13 +12,34 @@ from .serializers import *
 class ImageUploadParser(FileUploadParser):
     media_type = 'image/*'
 
+class SongFilter(DjangoFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        if request.query_params.get('genre_name'):
+            queryset = queryset.filter(genre__name__contains=request.query_params.get('genre_name'))
+        elif request.query_params.get('recently_played'):
+            user_id = int(request.query_params.get('user_id'))
+            user = User.objects.filter(id=user_id).first()
+            recently_songs = Recent.objects.filter(user=user).order_by('-played_at')[:10]
+            if recently_songs.exists():
+                for item in recently_songs:
+                    item = item.song.id
+            queryset = queryset.filter(id__in=recently_songs)
+        return super().filter_queryset(request, queryset, view)
+
 class ListSongsView(APIView):
+    pagination_class = LimitOffsetPagination
     # parser_classes = (ImageUploadParser,)
     def get(self, request, format=None):
-        #get 10 songs
-        songs = Song.objects.all()[:10]
-        serializer = SongSerializer(songs, context={'request': request},many=True)
-        return Response(serializer.data)
+        songs = Song.objects.all()
+        paginator = self.pagination_class()
+        filtered = SongFilter().filter_queryset(request, songs, self)
+        result = paginator.paginate_queryset(filtered, request)
+        # if result.exists():
+        serializer = SongSerializer(result, context={'request': request},many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        # else:
+        #     return Response({"error": "No songs found"}, status=status.HTTP_404_NOT_FOUND)
+        
         # permission_classes = (permissions.IsAuthenticated,)
     def post(self, request, format=None):
         data = request.data
@@ -125,3 +144,55 @@ class ListGenreView(APIView):
         serializers = GenreSerializer(genres, many=True)
         return Response(serializers.data)
 
+class RecentPlayedView(APIView):
+
+    def get(seft, request, format=None):
+        user_id = int(request.query_params.get('user_id'))
+        user = User.objects.filter(id=user_id).first()
+        recently_songs = Recent.objects.filter(user=user).order_by('-played_at')[:10]
+        if recently_songs.exists():
+            for item in recently_songs:
+                item = item.song
+            serializer = SongSerializer(recently_songs, context={'request': request}, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No songs found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+    def post(self, request, format=None):
+        data = request.data
+        user_id = int(data['user'])
+        song_id = int(data['song'])
+        user = User.objects.filter(id=user_id).first()
+        song = Song.objects.filter(id=song_id).first()
+        if user and song:
+            recent = Recent.objects.filter(user=user, song=song).first()
+            if recent:
+                recent.played_time = datetime.now()
+                recent.save()
+            else:
+                recent = Recent(user=user, song=song)
+                recent.save()
+            
+            song.update_view_count
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PlaylistView(APIView):
+    def get(self, request,format=None):
+        user_id = int(request.query_params.get('user_id'))
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+            playlists = Playlist.objects.filter(user=user).all()
+            serializer = PlaylistSerializer(playlists, context={'request':request}, many=True)
+            Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, format=None):
+        user_id = int(request.query_params.get('user_id'))
+        if user_id:
+            pass
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

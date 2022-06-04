@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { BASE_URL } from "./App";
 
 function MyMusic({
   mood,
   webCamera,
   audioList,
+  genreList,
   apiAudioList,
   prev,
   next,
@@ -14,6 +16,29 @@ function MyMusic({
 }) {
   const [username, setUsername] = useState("username");
 
+  const postSong = async (song) => {
+    try{
+      let form = document.getElementById('addEmployeeModal');
+      let song = {
+        title: form.elements.title.value,
+        artist: form.elements.artist.value,
+        year: form.elements.year.value,
+        cover: form.elements.cover.value,
+        song_file: form.elements.songfile.value,
+      }
+      let response = axios.post(BASE_URL + "/api/songs/", song)
+      .then ((res) => {
+        console.log(res);
+      },
+      (err) => {
+        console.log(err);
+      });
+      console.log(response);
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
   return (
     <>
       {/* songs */}
@@ -40,24 +65,24 @@ function MyMusic({
                     <div class="modal-body">					
                             <div class="form-group">
                               <label>Title</label>
-                              <input type="text" class="form-control" required/>
+                              <input type="text" id="title" class="form-control" required/>
                             </div>
                             <div class="form-group">
                               <label>Artist</label>
-                              <input type="text" class="form-control" required/>
+                              <input type="text" id="artist" class="form-control" required/>
                             </div>
                             <div class="form-group">
                               <label>Cover</label>
-                              <input type="file" id="img" name="img" accept="image/*"/>
+                              <input type="file" id="cover" name="cover" accept="image/*"/>
                             </div>
                             <div class="form-group">
                               <label>Song file</label>
-                              <input type="text" class="form-control" required/>
+                              <input type="file" id="songfile" name="songfile" accept=".mp3" required/>
                             </div>		
                             	
                     </div>
                     <div class="modal-footer">
-                            <input type="submit" class="btn btn-success" value="Add"/>
+                            <input type="submit" class="btn btn-success" value="Add" onSubmit={postSong()}/>
                     </div>
                    </form>
                       </div>

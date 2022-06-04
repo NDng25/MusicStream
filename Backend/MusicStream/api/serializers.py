@@ -67,10 +67,11 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 class PlaylistSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    songs = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    songs = SongSerializer(many=True)
     class Meta:
         model = Playlist
-        fields = '__all__'
+        fields = '__all__'      
+
 
 class RecentSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)

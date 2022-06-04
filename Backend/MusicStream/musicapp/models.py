@@ -25,12 +25,18 @@ class Song(models.Model):
     year = models.IntegerField(default=timezone.now().year)
     lyrics = models.TextField(blank=True)
     cover = models.ImageField(_('file'), db_index=True, null = True, blank=True,default='default.jpg', upload_to='media/cover_pics')
+    time_played = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     genre = models.ManyToManyField(Genre, blank=True)
     song_file = models.FileField(blank=True, default='default.mp3', upload_to='media/songs')
 
     def __str__(self):
         return f'{self.title} by {self.artist}'
+    
+    @property
+    def update_view_count(self):
+        self.time_played += 1
+        self.save()
 
 #create model for favourite songs
 class Favourite(models.Model):
@@ -50,3 +56,4 @@ class Playlist(models.Model):
 class Recent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    played_at = models.DateTimeField(default=timezone.now, blank=True)
