@@ -1,3 +1,4 @@
+from cmath import exp
 from django.http import Http404
 from matplotlib.style import context
 from rest_framework.views import Response, APIView, status
@@ -187,12 +188,78 @@ class PlaylistView(APIView):
             user = User.objects.filter(id=user_id).first()
             playlists = Playlist.objects.filter(user=user).all()
             serializer = PlaylistSerializer(playlists, context={'request':request}, many=True)
-            Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, format=None):
-        user_id = int(request.query_params.get('user_id'))
-        if user_id:
-            pass
+        data = request.data
+        user_id = request.POST.get('user_id')
+        song_id = request.POST.get('song_id')
+        #create new playlist
+        if user_id and song_id:
+            user_id = int(user_id)
+            song_id = int(song_id)
+            try:
+                user = User.objects.filter(id=user_id).first()
+                song = Song.objects.filter(id=song_id).first()
+                if user and song:
+                    playlist = Playlist(name=data['name'], user=user)
+                    playlist.save()
+                    playlist.addSong(song)
+                    return Response(status=status.HTTP_200_OK)
+                else:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self, request, format=None):
+        data = request.data
+        user_id = request.POST.get('user_id')
+        song_id = request.POST.get('song_id')
+        playlist_id = request.POST.get('playlist_id')
+        user = User.objects.filter(id=user_id).first()
+        playlist = Playlist.objects.filter(user=user, id=playlist_id).first()
+        if playlist:
+            if song_id:
+                song_id = int(song_id)
+                song = Song.objects.filter(id=song_id).first()
+                if song:
+                    if playlist.songs.filter(id=song_id).exists():
+                        playlist.songs.remove(song)
+                    else:
+                        playlist.songs.add(song)
+                        playlist.save()
+                    return Response(status=status.HTTP_200_OK)
+                else:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+            else:
+                playlist.name = data['name']
+                playlist.save()
+                return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, format=None):
+        user_id = request.POST.get('user_id')
+        playlist_id = request.POST.get('playlist_id')
+        user = User.objects.filter(id=user_id).first()
+        playlist = Playlist.objects.filter(user=user, id=playlist_id).first()
+        if playlist:
+            playlist.delete()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class PlaylistDetailView(APIView):
+    def get(self, request, pk, format=None):
+        playlist = Playlist.objects.filter(id=pk).first()
+        if playlist:
+            playlist_tracks = playlist.songs.all()
+            serializer = SongSerializer(playlist_tracks, context={'request': request}, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        
