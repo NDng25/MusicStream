@@ -12,6 +12,7 @@ import MainApp from "./MainApp";
 import Playlist from "./Playlist";
 import AllSongs from "./AllSongs";
 import MyMusic from "./MyMusic";
+import Favourite from "./Favourite";
 
 export const BASE_URL = "http://127.0.0.1:8000";
 
@@ -19,7 +20,6 @@ export const BASE_URL = "http://127.0.0.1:8000";
 function App() {
   // states
   const [audioList, setAudioList] = useState([]); //pagination array
-  const [genreList, setGenreList] = useState([]); //pagination array
 
   const [apiAudioList, setApiAudioList] = useState([]); //original array from api
   const [apiAudioListCopy, setApiAudioListCopy] = useState([]); //original array from api -> copy
@@ -29,8 +29,6 @@ function App() {
   const [audioInstance, setAudioInstance] = useState(null);
 
   const [currAudio, setCurrAudio] = useState([]);
-
-  const [userid, setUserid] = useState(1);
 
 
   // refs
@@ -71,36 +69,7 @@ function App() {
     }
     fetchMusic();
   }, []);
-  axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
-  useEffect(() => {
-    const fetchGenres = async () => {
-        try {
-            console.log("fetching genres");
-            let response = await axios.get(`${BASE_URL}/api/genres`);
-            let genres = response.data;
-            setGenreList(
-                genres.map((genre) => {
-                    return {
-                        id: genre.id,
-                        name: genre.name,
-                    };
-                })
-            );
-        } catch (error) {
-            if (error.response) {
-                console.log(error.response.data);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            } else if (error.request) {
-                console.log(error.request);
-            } else {
-                console.log("Error", error.message);
-            }
-            console.log(error.config);
-        }
-    };
-    fetchGenres();
-}, []);
+
 
   useEffect(() => {
     setAudioList(apiAudioList.slice(0, 6));
@@ -195,6 +164,16 @@ function App() {
                   </div>
                 </div>
               </NavLink>
+              <NavLink to="/favourite/" activeClassName="active" exact>
+                <div>
+                  <div>
+                    <span>
+                      <i className="fas fa-heart"></i>
+                    </span>{" "}
+                    Favourite
+                  </div>
+                </div>
+              </NavLink>
               <NavLink to="/mymusic/" activeClassName="active" exact>
                 <div>
                   <div>
@@ -215,16 +194,34 @@ function App() {
                   </div>
                 </div>
               </NavLink>
-              <NavLink to="/addplaylist/"  exact>
-                <div>
-                  <div className="glow-on-hover ">
-                    <a >
-                      <i className="fas fa-plus"></i>
-                    New Playlist
-                    </a>{" "}
-                  </div>
+              <div className="" >
+                  <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>
+              
+                  
+                   <div id="addPlaylist" class="modal fade">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                      <form>
+                      <div class="modal-header">						
+                              <h4 class="modal-title">Create Playlist</h4>
+                              <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      </div>
+                      <div class="modal-body">					
+                              <div class="form-group">
+                                <label>Your New Playlist Name</label>
+                                <input type="text" class="form-control" required/>	
+                                </div>
+                      </div>
+                      <div class="modal-footer">
+                              <input type="submit" class="btn btn-success" value="Create Playlist"/>
+                      </div>
+                    </form>
+                      </div>
+                    </div>
+                  </div>  
                 </div>
-              </NavLink>
+              
+                
 
               <div onClick={() => logout()}>
                 <div>{localStorage.getItem("token") && "Logout"}</div>
@@ -260,13 +257,20 @@ function App() {
               playMusic={playMusic}
             />
           </Route>
-          <Route path="/mymusic" exact>
-            <MyMusic
-              userid={userid}
-              genreList={genreList}
+          <Route path="/favourite" >
+            <Favourite
             />
           </Route>
-          <Route path="/playlist" exact>
+          <Route path="/mymusic" exact>
+            <MyMusic
+            mood={mood}
+            audioList={audioList}
+            // genreList={genreList}
+            apiAudioList={apiAudioList}
+            playMusic={playMusic}
+            />
+          </Route>
+          <Route path="/playlist" >
             <Playlist
             />
           </Route>

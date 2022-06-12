@@ -12,6 +12,8 @@ function MainApp({
   // Webcam,
   // fetchMusic,
 }) {
+  const tmp_id = 1;
+
   const [username, setUsername] = useState("username");
   // useEffect(() => {
   //   if (!localStorage.getItem("token")) {
@@ -32,6 +34,7 @@ function MainApp({
   //   catch(err){
   //     console.log(err);
   //   }
+    
   // }, []);
   return (
     <>

@@ -1,8 +1,9 @@
-from argparse import FileType
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.conf import settings
+from django.core.files.base import ContentFile
 
 # Create your models here.
 class Profile(models.Model):
@@ -25,12 +26,19 @@ class Song(models.Model):
     year = models.IntegerField(default=timezone.now().year)
     lyrics = models.TextField(blank=True)
     cover = models.ImageField(_('file'), db_index=True, null = True, blank=True,default='default.jpg', upload_to='media/cover_pics')
+    time_played = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     genre = models.ManyToManyField(Genre, blank=True)
     song_file = models.FileField(blank=True, default='default.mp3', upload_to='media/songs')
+    upload_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.title} by {self.artist}'
+    
+    @property
+    def update_view_count(self):
+        self.time_played += 1
+        self.save()
 
 #create model for favourite songs
 class Favourite(models.Model):
@@ -43,10 +51,21 @@ class Favourite(models.Model):
 class Playlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+    cover = models.FileField(default='default.jpg', upload_to='media/cover_pics')
     songs = models.ManyToManyField(Song, blank=True)
     def __str__(self):
         return f'{self.user.username} playlist {self.name}'
+    def addSong(self, song):
+        self.songs.add(song)
+        if self.cover == 'default.jpg':
+            new_file_path = 'media/playlist_pics/'
+            # Get the content of the file
+            file_content = ContentFile(song.cover.read())
+            self.cover.save(new_file_path, file_content)
+        self.save()
+    
 
 class Recent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    played_at = models.DateTimeField(default=timezone.now, blank=True)
