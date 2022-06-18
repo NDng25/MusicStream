@@ -1,8 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {useHistory} from 'react-router-dom';
 
 function MainApp({
   mood,
+  isLog
+  ,
   webCamera,
   audioList,
   apiAudioList,
@@ -12,9 +15,18 @@ function MainApp({
   // Webcam,
   // fetchMusic,
 }) {
+  const history = useHistory();
   const tmp_id = 1;
 
   const [username, setUsername] = useState("username");
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      
+    } else {
+      setUsername(localStorage.getItem("username"));
+    }
+  }, []);
   // useEffect(() => {
   //   if (!localStorage.getItem("token")) {
   //     window.location.pathname = "/login";
@@ -22,7 +34,7 @@ function MainApp({
   //     setUsername(localStorage.getItem("username"));
   //   }
   // }, []);
-  // fetch songs from api
+  // // fetch songs from api
   // const [songList, setSongList] = useState([]);
   
   // useEffect(() => {
@@ -43,13 +55,33 @@ function MainApp({
         {/* Search box */}
         <div className=" dflex">
           <input className="w80pt" type="search" placeholder="Search Music (in progress)" />
-          <div className="log" onClick="">
-            <h2 className="mb-3">Logout</h2>
-          </div>
+          {
+          (!isLog)?
+          (
+            <div className="log" onClick={() => {
+              history.push('/login');
+            }}>
+              <h2 className="mb-3">Login</h2>
+            </div>
+          ):
+          (
+           <></> 
+          )
+        }
+          
         </div>
 
         {/* song squares */}
-        <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, listen to {mood} songs</h2>
+        {
+          (isLog)?
+          (
+            <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, listen to {mood} songs</h2>
+          ):
+          (
+            <h2 className="mt-5 mb-3">Hi, listen to {mood} songs</h2>
+          )
+        }
+        
         <div className="d-flex mt-3 w-100 justify-content-between align-items-center">
           <div className="circle" onClick={() => prev()}>
             <i className="fas fa-arrow-left"></i>

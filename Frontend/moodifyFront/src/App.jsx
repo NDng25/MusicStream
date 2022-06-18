@@ -4,7 +4,7 @@ import "react-jinke-music-player/assets/index.css";
 import Webcam from "react-webcam";
 import axios from "axios";
 import Logo from "./assets/transparent_white.png";
-import { BrowserRouter, NavLink, Route } from "react-router-dom";
+import { BrowserRouter, NavLink, Route, useHistory } from "react-router-dom";
 import UserCard from "./UserCard";
 import SignupForm from "./SignupForm";
 import LoginForm from "./LoginForm";
@@ -18,6 +18,7 @@ export const BASE_URL = "http://127.0.0.1:8000";
 
 
 function App() {
+ 
   // states
   const [audioList, setAudioList] = useState([]); //pagination array
 
@@ -29,6 +30,14 @@ function App() {
   const [audioInstance, setAudioInstance] = useState(null);
 
   const [currAudio, setCurrAudio] = useState([]);
+  const [isLog, setIsLoged] = useState(false);
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+     setIsLoged(false);
+    }
+    else setIsLoged(true);
+  }, []);
+  
 
 
   // refs
@@ -164,7 +173,11 @@ function App() {
                   </div>
                 </div>
               </NavLink>
-              <NavLink to="/favourite/" activeClassName="active" exact>
+              {/* check login */}
+              {
+                (isLog)? (
+                  <>
+                       <NavLink to="/favourite/" activeClassName="active" exact>
                 <div>
                   <div>
                     <span>
@@ -220,6 +233,13 @@ function App() {
                     </div>
                   </div>  
                 </div>
+                  </>
+                ):
+                (
+                  <></>
+                )
+              }
+             
               
                 
 
@@ -232,12 +252,13 @@ function App() {
               <span>
                 <i className="far fa-copyright"></i>
               </span>{" "}
-              Team Moodify 2020
+              Team Moodify
             </div>
           </div>
 
           <Route path="/" exact>
             <MainApp
+              isLog={isLog}
               mood={mood}
               webCamera={webCamera}
               audioList={audioList}

@@ -18,9 +18,9 @@ function LoginForm(e) {
         let token = res.data.token;
         let username = res.data.username;
         let pk = res.data.pk;
-        localStorage.setItem("token", "token");
-        localStorage.setItem("username", "username");
-        localStorage.setItem("pk", "pk");
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("pk", pk);
         window.location.pathname = "/";
       })
       .catch((err) => {
@@ -36,7 +36,7 @@ function LoginForm(e) {
 
   return (
     <div className="w-75 d-flex justify-content-center align-items-center">
-      <form onSubmit={(e) => login(e)}>
+      <form onSubmit={(e) => login(e)} className="OnFormCenter">
         <div className="form-group">
           <label for="exampleInputEmail1">Username</label>
           <input

@@ -1,13 +1,107 @@
+from cmath import exp
 from django.http import Http404
+from matplotlib.style import context
+from rest_framework import generics
+from rest_framework.response import Response
 from rest_framework.views import Response, APIView, status
 from rest_framework.generics import *
+# from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny
 from rest_framework.parsers import FileUploadParser
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from argparse import Namespace
+from django.contrib.auth import authenticate
 # from PIL import Image
 from musicapp.models import *
 from .serializers import *
 
+
+class UserDetailView(ViewSet):
+    def login(self, request):
+
+        data = request.data
+
+        data = Namespace(**data)
+
+        try:
+
+            user = authenticate(
+                request, username=data.username, password=data.password)
+
+            if user != None:
+
+                token = Token.objects.filter(user=user).first()
+
+                if token:
+
+                    return Response({"result": "Success", "token": token.key, "username": token.user.username, "pk": user.pk}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+
+            print(e)
+
+            return Response({"result": "Failure"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    def signup(self, request):
+
+        data = request.data
+
+        data = Namespace(**data)
+
+        try:
+
+            user = User.objects.create(
+                email=data.email, username=data.username)
+
+            user.set_password(data.password)
+
+            user.save()
+
+            Token.objects.get_or_create(user=user)
+
+            return Response({"result": "Success"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+
+            print(e)
+
+            return Response({"result": "Failure"}, status=status.HTTP_226_IM_USED)
+    
+    def view_users(self, request):
+
+        data = request.data
+
+        data = Namespace(**data)
+
+        token = Token.objects.filter(key=data.token).first()
+
+        if token:
+
+            curr_user = token.user
+
+            users = User.objects.all().exclude(pk=curr_user.pk)
+
+            users_dict = []
+
+            for user in users:
+
+                user_dict = {
+                    "id": user.pk,
+                    "name": user.username
+                }
+
+                users_dict.append(user_dict)
+
+            return Response(users_dict)
+        
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+    
 class ImageUploadParser(FileUploadParser):
     media_type = 'image/*'
 
@@ -60,6 +154,8 @@ class ListSongsView(APIView):
                 raise Exception("Invalid file type")
             if song_file.size > 1024*1024*20:
                 raise Exception("File too large")
+            # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
+            #     raise Exception("Invalid file type")
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         data['user'] = User.objects.filter(id=user_id).first().id
