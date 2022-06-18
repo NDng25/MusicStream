@@ -15,6 +15,13 @@ function MyMusic({
   // fetchMusic,
 }) {
   const [username, setUsername] = useState("username");
+  // useEffect(() => {
+  //   if (!localStorage.getItem("token")) {
+  //     window.location.pathname = "/login";
+  //   } else {
+  //     setUsername(localStorage.getItem("username"));
+  //   }
+  // }, []);
 
   const postSong = async (song) => {
     try{

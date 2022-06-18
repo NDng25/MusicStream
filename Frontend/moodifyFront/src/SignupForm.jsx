@@ -31,7 +31,7 @@ function SignupForm() {
   }, [])
   return (
     <div className="w-75 d-flex justify-content-center align-items-center">
-      <form onSubmit={(e) => signup(e)}>
+      <form onSubmit={(e) => signup(e)} className="OnFormCenter">
         <div className="form-group">
           <label for="exampleInputEmail1">Email</label>
           <input
