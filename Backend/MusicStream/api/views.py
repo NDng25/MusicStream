@@ -1,6 +1,4 @@
-from cmath import exp
 from django.http import Http404
-from matplotlib.style import context
 from rest_framework.views import Response, APIView, status
 from rest_framework.generics import *
 from rest_framework.parsers import FileUploadParser
@@ -62,8 +60,6 @@ class ListSongsView(APIView):
                 raise Exception("Invalid file type")
             if song_file.size > 1024*1024*20:
                 raise Exception("File too large")
-            # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
-            #     raise Exception("Invalid file type")
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         data['user'] = User.objects.filter(id=user_id).first().id

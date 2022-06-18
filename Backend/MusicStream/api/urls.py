@@ -5,7 +5,7 @@ from .views import *
 # router.register(r'songs', views.ListSongsView)
 
 urlpatterns = [
-    path('songs/', ListSongsView.as_view()),
+    path('songs/', ListSongsView.as_view()), #filter: ?
     path('songs/<int:pk>/', SongDetailView.as_view()),
     path('recently_played/', RecentPlayedView.as_view()),
     path('playlist/', PlaylistView.as_view()),
