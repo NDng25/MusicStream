@@ -8,6 +8,7 @@ from rest_framework.generics import *
 # from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import FileUploadParser
+from django.contrib import messages
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ViewSet
@@ -354,4 +355,17 @@ class PlaylistDetailView(APIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        
+class FavouriteDetailView(ViewSet):
+    def get(self, request,format=None):
+        songs_id = Song.objects.filter(favourite__user=request.user, favourite__is_fav=True).distinct()
+        user_id = int(request.query_params.get('user_id'))
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+            # song_id = list(request.POST.keys())[1]
+            favourite_song = Favourite.objects.filter(user=user, song__id=songs_id, is_fav=True)
+            serializer = FavouriteSerializer(favourite_song, context={'request':request}, many=True)
+            favourite_song.delete()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+         

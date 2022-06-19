@@ -15,6 +15,9 @@ login = views.UserDetailView.as_view({
 view_users = views.UserDetailView.as_view({
     'post': 'view_users'
 })
+fav = views.FavouriteDetailView.as_view({
+    'post': 'fav'
+})
 
 urlpatterns = [
     # path('login/',UserDetailView.as_view(), name='login' ),
@@ -28,5 +31,6 @@ urlpatterns = [
     path('playlist/', PlaylistView.as_view()),
     path('playlist/<int:pk>/', PlaylistDetailView.as_view()),
     path('genres/', ListGenreView.as_view()),
+    path('fav/',fav ),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

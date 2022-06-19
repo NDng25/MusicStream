@@ -42,8 +42,10 @@ class Song(models.Model):
 
 #create model for favourite songs
 class Favourite(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    is_fav = models.BooleanField(default=False)
     def __str__(self):
         return f'{self.user.username} likes {self.song.title}'
 

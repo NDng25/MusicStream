@@ -193,7 +193,7 @@ function App() {
                     <span>
                       <i className="fas fa-headphones"></i>
                     </span>{" "}
-                    MyMusic
+                    My Music
                   </div>
                 </div>
               </NavLink>
