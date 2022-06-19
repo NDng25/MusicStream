@@ -23,14 +23,18 @@ function App() {
   const [audioList, setAudioList] = useState([]); //pagination array
 
   const [apiAudioList, setApiAudioList] = useState([]); //original array from api
-  const [apiAudioListCopy, setApiAudioListCopy] = useState([]); //original array from api -> copy
 
-  const [mood, setMood] = useState("");
+  const [apiAudioListCopy, setApiAudioListCopy] = useState([]); //original array from api -> copy
 
   const [audioInstance, setAudioInstance] = useState(null);
 
   const [currAudio, setCurrAudio] = useState([]);
+
   const [isLog, setIsLoged] = useState(false);
+
+  const [genres, setGenres] = useState(null);
+  const [userId, setUserId] = useState(localStorage.getItem("pk"));
+
   useEffect(() => {
     if (!localStorage.getItem("token")) {
      setIsLoged(false);
@@ -38,6 +42,25 @@ function App() {
     else setIsLoged(true);
   }, []);
   
+
+  //get genres from api
+  useEffect(() => {
+    const fetchGenres = async() => {
+      try {
+        let response = await axios.get(`${BASE_URL}/api/genres/`);
+        let genres = response.data;
+        console.log("Genres: ");
+        console.log(genres);
+        setGenres(genres);
+      }
+      catch (err) {
+        console.log(err);
+      }
+    }
+    fetchGenres();
+    console.log("Genres: ");
+    console.log(genres);
+  },[]);
 
 
   // refs
@@ -85,9 +108,10 @@ function App() {
   }, [apiAudioList, apiAudioListCopy]);
 
   function playMusic(song) {
-    // audioInstance.clear();
+    audioInstance.clear();
     setTimeout(() => {
-      setCurrAudio([...currAudio,song]);
+      // setCurrAudio([...currAudio,song]);
+      setCurrAudio([song]);
       console.log("playing music");
       console.log(song);
       audioInstance.play();
@@ -258,9 +282,9 @@ function App() {
 
           <Route path="/" exact>
             <MainApp
+              userId={userId}
+              genres={genres}
               isLog={isLog}
-              mood={mood}
-              webCamera={webCamera}
               audioList={audioList}
               apiAudioList={apiAudioList}
               prev={prev}
@@ -272,7 +296,6 @@ function App() {
           </Route>
           <Route path="/allsongs" exact>
             <AllSongs
-              mood={mood}
               audioList={audioList}
               apiAudioList={apiAudioList}
               playMusic={playMusic}
@@ -284,7 +307,7 @@ function App() {
           </Route>
           <Route path="/mymusic" exact>
             <MyMusic
-            mood={mood}
+            userId={userId}
             audioList={audioList}
             // genreList={genreList}
             apiAudioList={apiAudioList}

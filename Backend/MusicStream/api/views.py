@@ -107,6 +107,7 @@ class ImageUploadParser(FileUploadParser):
 
 class SongFilter(DjangoFilterBackend):
     def filter_queryset(self, request, queryset, view):
+        search_filter_field = ['title', 'artist']
         if request.query_params.get('genre_name'):
             queryset = queryset.filter(genre__name__contains=request.query_params.get('genre_name'))
         elif request.query_params.get('recently_played'):
@@ -117,7 +118,15 @@ class SongFilter(DjangoFilterBackend):
                 for item in recently_songs:
                     item = item.song.id
             queryset = queryset.filter(id__in=recently_songs)
+        elif request.query_params.get('search_field'):
+            search_field = request.query_params.get('search_field')
+            if search_field not in search_filter_field:
+                return super().filter_queryset(request, queryset, view)
+            query = request.query_params.get('query')
+            queryset = queryset.filter(**{search_field + '__icontains': query})
+            
         return super().filter_queryset(request, queryset, view)
+
 
 class ListSongsView(APIView):
     pagination_class = LimitOffsetPagination
@@ -266,11 +275,11 @@ class RecentPlayedView(APIView):
             else:
                 recent = Recent(user=user, song=song)
                 recent.save()
-            
+
             song.update_view_count
-            return Response(status=status.HTTP_200_OK)
+            return Response({"result": "Success"}, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "user or song invalid"}, status=status.HTTP_400_BAD_REQUEST)
     
 
 class PlaylistView(APIView):
@@ -282,7 +291,7 @@ class PlaylistView(APIView):
             serializer = PlaylistSerializer(playlists, context={'request':request}, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid id"}, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, format=None):
         data = request.data
         user_id = request.POST.get('user_id')
@@ -298,9 +307,10 @@ class PlaylistView(APIView):
                     playlist = Playlist(name=data['name'], user=user)
                     playlist.save()
                     playlist.addSong(song)
-                    return Response(status=status.HTTP_200_OK)
+                    created_playlist = Playlist.objects.filter(id=playlist.id).first()
+                    return Response(created_playlist ,status=status.HTTP_200_OK)
                 else:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "Invalid id"},status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -323,15 +333,17 @@ class PlaylistView(APIView):
                     else:
                         playlist.songs.add(song)
                         playlist.save()
-                    return Response(status=status.HTTP_200_OK)
+                    modified_playlist = Playlist.objects.filter(id=playlist.id).first()
+                    return Response(modified_playlist, status=status.HTTP_200_OK)
                 else:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "Song does not found"},status=status.HTTP_400_BAD_REQUEST)
             else:
                 playlist.name = data['name']
                 playlist.save()
-                return Response(status=status.HTTP_200_OK)
+                modified_playlist = Playlist.objects.filter(id=playlist.id).first()
+                return Response(modified_playlist, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Playlist does not found"},status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
         user_id = request.POST.get('user_id')
@@ -340,9 +352,9 @@ class PlaylistView(APIView):
         playlist = Playlist.objects.filter(user=user, id=playlist_id).first()
         if playlist:
             playlist.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response({"result": "Delete successfully"}, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Playlist does not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 class PlaylistDetailView(APIView):
     def get(self, request, pk, format=None):
@@ -352,6 +364,6 @@ class PlaylistDetailView(APIView):
             serializer = SongSerializer(playlist_tracks, context={'request': request}, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Playlist does not found"}, status=status.HTTP_404_NOT_FOUND)
 
         

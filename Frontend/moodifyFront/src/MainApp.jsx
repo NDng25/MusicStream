@@ -1,24 +1,22 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {useHistory} from 'react-router-dom';
+import { BASE_URL } from "./App";
 
 function MainApp({
-  mood,
-  isLog
-  ,
-  webCamera,
+  userId,
+  genres,
+  isLog,
   audioList,
-  apiAudioList,
   prev,
   next,
   playMusic,
-  // Webcam,
-  // fetchMusic,
 }) {
   const history = useHistory();
-  const tmp_id = 1;
 
   const [username, setUsername] = useState("username");
+
+  const [songByGenre, setSongByGenre] = useState([]);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -27,27 +25,43 @@ function MainApp({
       setUsername(localStorage.getItem("username"));
     }
   }, []);
-  // useEffect(() => {
-  //   if (!localStorage.getItem("token")) {
-  //     window.location.pathname = "/login";
-  //   } else {
-  //     setUsername(localStorage.getItem("username"));
-  //   }
-  // }, []);
-  // // fetch songs from api
-  // const [songList, setSongList] = useState([]);
-  
-  // useEffect(() => {
-  //   try{
-  //     let response = axios.get("http//127.0.0.1:8000/api/songs/");
-  //     setSongList(response.data);
-  //     console.log('useEffect called');
-  //   }
-  //   catch(err){
-  //     console.log(err);
-  //   }
-    
-  // }, []);
+
+  useEffect(() =>{
+    const fetchSongByGenre =async (g) => {
+      let genre_name = ((g.name).includes(" "))? (g.name).replace(" ", "+") : g.name;
+      let response = await axios.get(`${BASE_URL}/api/songs?genre_name=${genre_name}`);
+      console.log(`${BASE_URL}/api/songs?genre_name=${genre_name}`);
+        let songs = response.data;
+        // console.log("fetched songs: ");
+        // console.log(songs);
+        setSongByGenre(songByGenre => [...songByGenre, {
+          genre: g.name,
+          songs: songs.map((song) => {
+            return {
+              id: song.id,
+              name: song.title,
+              musicSrc: song.song_file,
+              artist:song.artist,
+              cover: song.cover,
+            };
+          })
+        } ]);
+    }
+    const fetchSongAllGenre = async() => {
+      if(genres){
+        genres.map((g) => {
+          fetchSongByGenre(g);
+        }
+        );
+        console.log("fetch all genre. Genres:", genres);
+      }
+      else{
+        console.log("no genres");
+      }
+    }
+    fetchSongAllGenre();
+  }, [genres]);
+
   return (
     <>
       {/* songs */}
@@ -75,10 +89,10 @@ function MainApp({
         {
           (isLog)?
           (
-            <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, listen to {mood} songs</h2>
+            <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, Listening is everything</h2>
           ):
           (
-            <h2 className="mt-5 mb-3">Hi, listen to {mood} songs</h2>
+            <h2 className="mt-5 mb-3">Hi, Listening is everything</h2>
           )
         }
         
@@ -106,7 +120,7 @@ function MainApp({
               //   );
               audioList.map((song) => {
                 return (
-                  console.log(song),
+                  // console.log(song),
                   <div
                     key={song.id}
                     className="nav-btn"
@@ -128,40 +142,48 @@ function MainApp({
             <i className="fas fa-arrow-right"></i>
           </div>
         </div>
-
-       { /* Trending Songs  */ }
-        <div >
-        <h2 className="mt-5 mb-3">Trending Songs</h2>
-        </div>
-        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
-        <div className="circle" onClick={() => prev()}>
-            <i className="fas fa-arrow-left"></i>
-          </div>
         {
-        audioList.map((song) => {
-                return (
-                  console.log(song),
-                  <div
-                    key={song.id}
-                    className="nav-btn"
-                    onClick={() => playMusic(song)}
-                  >
-                    <div>
-                      <img src={song.cover} className="mw-100" alt="song-cover" />
-                    </div>
-                    <div>
-                      <p>{song.name.slice(0, 15)}</p>
-                    </div>
-                  </div>
-                );
-              })
-            }
-            <div className="circle" onClick={() => next()}>
-            <i className="fas fa-arrow-right"></i>
-          </div>
-        </div>
+          songByGenre.map((item) => {       
+            return(
+              <div>
+              <div >
+              <h2 className="mt-5 mb-3">{item.genre} Songs</h2>
+              </div>
+              <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
+              <div className="circle" onClick={() => prev()}>
+                  <i className="fas fa-arrow-left"></i>
+              </div>
+              {
+                  item.songs.map((song) => {
+                      return (
+                        
+                        <div
+                          key={song.id}
+                          className="nav-btn"
+                          onClick={() => playMusic(song)}
+                        >
+                          <div>
+                            <img src={song.cover} className="mw-100" alt="song-cover" />
+                          </div>
+                          <div>
+                            <p>{song.name.slice(0, 15)}</p>
+                          </div>
+                        </div>
+                        
+                      );
+                    })
+                  }
+                  <div className="circle" onClick={() => next()}>
+                  <i className="fas fa-arrow-right"></i>
+                </div>
+              </div>
+              </div>
+            );
+          })
+        }
+       
         { /* Other Hits */ }
-        <div >
+        {/* <div >
         <h2 className="mt-5 mb-3">Other Hits</h2>
         </div>
         <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
@@ -190,7 +212,7 @@ function MainApp({
             <div className="circle" onClick={() => next()}>
             <i className="fas fa-arrow-right"></i>
           </div>
-        </div>
+        </div> */}
         
         {/* webcam and list */}
         {/* <h2 className="mt-5">Songs based on your mood</h2> */}
