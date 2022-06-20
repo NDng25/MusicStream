@@ -13,6 +13,7 @@ import Playlist from "./Playlist";
 import AllSongs from "./AllSongs";
 import MyMusic from "./MyMusic";
 import Favourite from "./Favourite";
+import DetailPlaylist from "./DetailPlaylist";
 
 export const BASE_URL = "http://127.0.0.1:8000";
 
@@ -33,8 +34,32 @@ function App() {
   const [isLog, setIsLoged] = useState(false);
 
   const [genres, setGenres] = useState(null);
+  
   const [userId, setUserId] = useState(localStorage.getItem("pk"));
 
+  const [playlistid, setPlaylist] = useState([]);
+  useEffect(() =>{
+    const fetchPlaylistbyId =async () => {
+      const user_id = localStorage.getItem("pk");
+      let response = await axios.get(`${BASE_URL}/api/playlist?user_id=${user_id}`);
+        console.log(`${BASE_URL}/api/playlist?user_id=${user_id}`);
+      let playlists = response.data;
+        setPlaylist(
+        playlists.map((playlist) => {
+            return {
+              id : playlist.id,
+              user: playlist.user,
+              name: playlist.name,
+              cover:playlist.cover,
+              songs: playlist.songs,
+            };
+         }),
+          
+        );
+    }
+    fetchPlaylistbyId();
+  }, []);
+  
   useEffect(() => {
     if (!localStorage.getItem("token")) {
      setIsLoged(false);
@@ -162,6 +187,7 @@ function App() {
     localStorage.clear();
     window.location.pathname = "/login";
   }
+ 
 
   return (
     <div >
@@ -169,7 +195,7 @@ function App() {
       <BrowserRouter>
         <div className="d-flex h-90">
           {/* menu */}
-          <div className="w-15 text-center pt-5 posi" id="menu">
+          <div className="w-15 text-center pt-5 position" id="menu">
             {/* logo */}
             <div>
               <img src={Logo} alt="logo" className="logo" />
@@ -235,27 +261,7 @@ function App() {
                   <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>
               
                   
-                   <div id="addPlaylist" class="modal fade">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                      <form>
-                      <div class="modal-header">						
-                              <h4 class="modal-title">Create Playlist</h4>
-                              <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                      </div>
-                      <div class="modal-body">					
-                              <div class="form-group">
-                                <label>Your New Playlist Name</label>
-                                <input type="text" class="form-control" required/>	
-                                </div>
-                      </div>
-                      <div class="modal-footer">
-                              <input type="submit" class="btn btn-success" value="Create Playlist"/>
-                      </div>
-                    </form>
-                      </div>
-                    </div>
-                  </div>  
+                   
                 </div>
                   </>
                 ):
@@ -266,7 +272,7 @@ function App() {
              
               
                 
-
+            
               <div onClick={() => logout()}>
                 <div>{localStorage.getItem("token") && "Logout"}</div>
               </div>
@@ -279,6 +285,27 @@ function App() {
               Team Moodify
             </div>
           </div>
+          <div id="addPlaylist" class="modal fade">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                      <form>
+                      <div class="modal-header">						
+                              <h4 class="modal-title">Create Playlist</h4>
+                              <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      </div>
+                      <div class="modal-body">					
+                              <div class="form-group">
+                                <p>Your New Playlist Name</p>
+                                <input type="text" class="form-control" required/>	
+                                </div>
+                      </div>
+                      <div class="modal-footer">
+                              <input type="submit" class="btn btn-success" value="Create Playlist"/>
+                      </div>
+                    </form>
+                      </div>
+                    </div>
+                  </div>  
 
           <Route path="/" exact>
             <MainApp
@@ -316,7 +343,18 @@ function App() {
           </Route>
           <Route path="/playlist" >
             <Playlist
+            audioList={audioList}
+            apiAudioList={apiAudioList}
+            playMusic={playMusic}
+            userId={userId}
+            playlistid={playlistid}
             />
+          </Route>
+          <Route path="/detailplaylist">
+             <DetailPlaylist
+                userId={userId}
+                playlistid={playlistid}
+             />
           </Route>
 
           <Route path="/signup" exact>

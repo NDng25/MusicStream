@@ -37,6 +37,7 @@ function AllSongs({
                   <div
                     key={song.id}
                     className="nav-btn1"
+                    style={{height: "100px"}}
                     onClick={() => playMusic(song)}
                   >
                     <div>
@@ -49,7 +50,10 @@ function AllSongs({
                       <p  className="w100 mg">{song.artist.slice(0, 15)} </p>
                     </div>
                     <div  className="w300">
-                        <i className="fas fa-heart mg" ></i>
+                      <div id ="" className="mt-heart mg" >
+                          <input id={song.id} type="checkbox"/> 
+                          <label  for={song.id}></label> 
+                      </div>
                     </div>
                     <div  className="w300">
                     <a claclassNamess="" onclick="" title="Add to Playlist"> <i

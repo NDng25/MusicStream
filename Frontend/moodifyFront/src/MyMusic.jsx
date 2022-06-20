@@ -104,6 +104,7 @@ function MyMusic({
                  <div
                    key={song.id}
                    className="nav-btn1"
+                   style={{height: "100px"}}
                    onClick={() => playMusic(song)}
                  >
                    <div>

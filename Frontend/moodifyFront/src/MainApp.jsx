@@ -101,23 +101,6 @@ function MainApp({
             <i className="fas fa-arrow-left"></i>
           </div>
           {
-              // print songs
-              // audioList.map((song, index) => {
-              //   return (
-              //     <div
-              //       key={index}
-              //       className="song-square"
-              //       onClick={() => playMusic(song.id)}
-              //     >
-              //       <div className="song-square-img">
-              //         <img src={song.image} alt="song" />
-              //       </div>
-              //       <div className="song-square-info">
-              //         <div className="song-square-title">{song.title}</div>
-              //         <div className="song-square-artist">{song.artist}</div>
-              //       </div>
-              //     </div>
-              //   );
               audioList.map((song) => {
                 return (
                   // console.log(song),
@@ -126,8 +109,41 @@ function MainApp({
                     className="nav-btn"
                     onClick={() => playMusic(song)}
                   >
-                    <div>
+                    <div class="contain">
                       <img src={song.cover} className="mw-100" alt="song-cover" />
+                      {
+                          (isLog)?
+                          (
+                            <div class="overlay">
+                                <div id ="" className="mt-heart" >
+                                    <input id={song.id} type="checkbox"/> 
+                                    <label  for={song.id}></label> 
+                                </div>
+                                <button
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      color:"black"
+
+                                    }}
+                                  >
+                                  Add playlist
+                                  </button>
+                              </div>
+                          ):
+                          (
+                            <div class="overlay">
+                                <div
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      margin:"40px"
+                                    }}
+                                  >
+                                  <i className="fas fa-play-circle" style={{fontSize: "50px"}}>&#xE254;</i>
+                                  </div>     
+                              </div>
+                          )
+                        }
+                      
                     </div>
                     <div>
                       <p>{song.name.slice(0, 15)}</p>
@@ -136,7 +152,36 @@ function MainApp({
                 );
               })
             }
-          
+           <div id="Playlist1" class="modal fade">
+                                  <div class="modal-dialog">
+                                      <div class="modal-content">
+                                      <div class="modal-header">	
+                                         <h4 class="modal-title">Playlist Name</h4>					
+                                        <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                        <div className=" mt-3 w-100 justify-content-between align-items-center">
+                                          {
+                                            
+                                              audioList.map((song) => {
+                                                return (
+                                                  console.log(song),
+                                                  <div
+                                                    key={song.id}
+                                                    className="nav-btn1"
+                                                    onClick={() => playMusic(song)}
+                                                  >
+                                                    <div  className="w300 bg">
+                                                      <p  className="w200 ">{song.name.slice(0, 15)} </p>
+                                                      <hr></hr>
+                                                    </div>
+                                                  </div>
+                                                );
+                                              })
+                                            }
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div> 
 
           <div className="circle" onClick={() => next()}>
             <i className="fas fa-arrow-right"></i>
@@ -162,8 +207,18 @@ function MainApp({
                           className="nav-btn"
                           onClick={() => playMusic(song)}
                         >
-                          <div>
+                          <div className="contain">
                             <img src={song.cover} className="mw-100" alt="song-cover" />
+                            <div class="overlay">
+                                <div
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      margin:"40px"
+                                    }}
+                                  >
+                                  <i className="fas fa-play-circle" style={{fontSize: "50px"}}>&#xE254;</i>
+                                  </div>     
+                              </div>
                           </div>
                           <div>
                             <p>{song.name.slice(0, 15)}</p>
@@ -182,71 +237,7 @@ function MainApp({
           })
         }
        
-        { /* Other Hits */ }
-        {/* <div >
-        <h2 className="mt-5 mb-3">Other Hits</h2>
-        </div>
-        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
-        <div className="circle" onClick={() => prev()}>
-            <i className="fas fa-arrow-left"></i>
-          </div>
-        {
-        audioList.map((song) => {
-                return (
-                  console.log(song),
-                  <div
-                    key={song.id}
-                    className="nav-btn"
-                    onClick={() => playMusic(song)}
-                  >
-                    <div>
-                      <img src={song.cover} className="mw-100" alt="song-cover" />
-                    </div>
-                    <div>
-                      <p>{song.name.slice(0, 15)}</p>
-                    </div>
-                  </div>
-                );
-              })
-            }
-            <div className="circle" onClick={() => next()}>
-            <i className="fas fa-arrow-right"></i>
-          </div>
-        </div> */}
-        
-        {/* webcam and list */}
-        {/* <h2 className="mt-5">Songs based on your mood</h2> */}
-        {/* <div className="d-flex justify-content-between mt-3 w-100"> */}
-          {/* list */}
-          {/* <div className="list">
-            {apiAudioList.map((song) => {
-              return (
-                <div
-                  key={song.id}
-                  className="listing text-center py-2 font-weight-bold"
-                  onClick={() => playMusic(song)}
-                >
-                  {song.name.slice(0, 35)}
-                </div>
-              );
-            })}
-          </div> */}
-
-          {/* webcam
-          <div id="cam-div">
-            <Webcam className="webcam" ref={webCamera} mirrored={true} />
-            <button onClick={() => fetchMusic()}>Moodify</button>
-          </div> */}
-
-          {/* mood indicator */}
-          {/* <div
-            id="mood-div"
-            className="d-flex justify-content-center align-items-center flex-column"
-          >
-            <p className="mb-3">You seem to be</p>
-            <p className="font-weight-bold m-0">{mood}</p>
-          </div> */}
-        {/* </div> */}
+       
       </div>
     </>
   );
