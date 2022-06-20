@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -51,17 +51,14 @@ class Favourite(models.Model):
 class Playlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    cover = models.FileField(default='default.jpg', upload_to='media/cover_pics')
+    cover = models.ImageField(default='default.jpg', upload_to='media/songs')
     songs = models.ManyToManyField(Song, blank=True)
     def __str__(self):
         return f'{self.user.username} playlist {self.name}'
     def addSong(self, song):
         self.songs.add(song)
         if self.cover == 'default.jpg':
-            new_file_path = 'media/playlist_pics/'
-            # Get the content of the file
-            file_content = ContentFile(song.cover.read())
-            self.cover.save(new_file_path, file_content)
+            self.cover = song.cover
         self.save()
     
 
