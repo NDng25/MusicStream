@@ -49,16 +49,17 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Genre
         fields = ['id', 'name']
 
 class SongSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=User.objects.all(), default=serializers.CurrentUserDefault())
-    genre = GenreSerializer(many=True,read_only=True)
+    genres = GenreSerializer(many=True,read_only=True)
     class Meta:
         model = Song
-        fields = ['id', 'title', 'artist', 'lyrics','year', 'genre', 'user', 'cover', 'song_file']
+        fields = ['id', 'title', 'artist', 'lyrics','year', 'genres', 'user', 'cover', 'song_file']
     
     def validate(self, data):
         if data['year'] < 0 or data['year'] > datetime.datetime.now().date().year:
@@ -70,7 +71,7 @@ class SongSerializer(serializers.ModelSerializer):
         song = Song.objects.create(**validated_data)
         for genre in genres:
             genre_obj = Genre.objects.filter(id=genre).first()
-            song.genre.add(genre_obj)
+            song.genres.add(genre_obj)
         return song
     
     def update(self, instance, validated_data):
@@ -80,13 +81,16 @@ class SongSerializer(serializers.ModelSerializer):
         instance.year = validated_data.get('year', instance.year)
         instance.cover = validated_data.get('cover', instance.cover)
         instance.song_file = validated_data.get('song_file', instance.song_file)
-        instance.genre.clear()
+        instance.genres.clear()
         genre_ids = self.context['genre']
+        print(genre_ids)
         for id in genre_ids:
             try:
                 genre_obj = Genre.objects.filter(id=id).first()
-                instance.genre.add(genre_obj)
+                print(genre_obj)
+                instance.genres.add(genre_obj)
             except Exception as e:
+                print('genre error')
                 raise serializers.ValidationError(str(e))
         instance.save()
         return instance

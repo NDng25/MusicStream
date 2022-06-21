@@ -17,6 +17,7 @@ class Profile(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=500, blank=True)
+    songs = models.ManyToManyField('musicapp.Song', blank=True)
     def __str__(self):
         return self.name
 
@@ -28,7 +29,7 @@ class Song(models.Model):
     cover = models.ImageField(_('file'), db_index=True, null = True, blank=True,default='default.jpg', upload_to='media/cover_pics')
     time_played = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    genre = models.ManyToManyField(Genre, blank=True)
+    genres = models.ManyToManyField(Genre, blank=True)
     song_file = models.FileField(blank=True, default='default.mp3', upload_to='media/songs')
     upload_at = models.DateTimeField(auto_now_add=True)
 
