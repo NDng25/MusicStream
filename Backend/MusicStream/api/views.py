@@ -3,6 +3,7 @@ from django.http import Http404
 from matplotlib.style import context
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import Response, APIView, status
 from rest_framework.generics import *
 # from rest_framework.authentication import TokenAuthentication
@@ -16,7 +17,6 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from argparse import Namespace
 from django.contrib.auth import authenticate
-# from PIL import Image
 from musicapp.models import *
 from .serializers import *
 
@@ -109,7 +109,7 @@ class SongFilter(DjangoFilterBackend):
     def filter_queryset(self, request, queryset, view):
         search_filter_field = ['title', 'artist']
         if request.query_params.get('genre_name'):
-            queryset = queryset.filter(genre__name__contains=request.query_params.get('genre_name'))
+            queryset = queryset.filter(genres__name__contains=request.query_params.get('genre_name'))
         elif request.query_params.get('recently_played'):
             user_id = int(request.query_params.get('user_id'))
             user = User.objects.filter(id=user_id).first()
@@ -124,12 +124,17 @@ class SongFilter(DjangoFilterBackend):
                 return super().filter_queryset(request, queryset, view)
             query = request.query_params.get('query')
             queryset = queryset.filter(**{search_field + '__icontains': query})
-            
+        elif request.query_params.get('user'):
+            user_id = int(request.query_params.get('user'))
+            user = User.objects.filter(id=user_id).first()
+            queryset = queryset.filter(user=user)
         return super().filter_queryset(request, queryset, view)
 
 
 class ListSongsView(APIView):
     pagination_class = LimitOffsetPagination
+
+    parser_classes = [MultiPartParser]
     # parser_classes = (ImageUploadParser,)
     def get(self, request, format=None):
         songs = Song.objects.all()
@@ -145,10 +150,13 @@ class ListSongsView(APIView):
         # permission_classes = (permissions.IsAuthenticated,)
     def post(self, request, format=None):
         data = request.data
+        print(data)
         data['year'] = int(data['year'])
         user_id = int(data['user'])
         try:
-            img = request.FILES['cover']
+            if request.data['cover'] is None:
+                raise Exception('File is null')
+            img = request.data['cover']
             if img.content_type not in ['image/jpeg', 'image/png']:
                 raise Exception('File type not supported')
             if img.size > 1024*1024*10:
@@ -158,10 +166,10 @@ class ListSongsView(APIView):
         
         #check songs file is valid
         try:
-            song_file = request.FILES['song_file']
+            song_file = request.data['song_file']
             if song_file.content_type not in ['audio/mpeg', 'audio/mp3']:
                 raise Exception("Invalid file type")
-            if song_file.size > 1024*1024*20:
+            if song_file.size > 1024*1024*30:
                 raise Exception("File too large")
             # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
             #     raise Exception("Invalid file type")
@@ -169,7 +177,7 @@ class ListSongsView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         data['user'] = User.objects.filter(id=user_id).first().id
         genre_list = request.POST.get('genre')
-        genre_list = list(map(int, genre_list.split(',')))
+        # genre_list = list(map(int, genre_list.split(',').map(int)))
         data['genre'] = genre_list
         serializer = SongSerializer(data=data, context={'genre': genre_list})
         if serializer.is_valid():
@@ -200,9 +208,11 @@ class SongDetailView(APIView):
     def put(self, request, pk, format=None):
         snippet = self.get_object(pk)
         data = request.data.copy()
-        genre_ids = list(map(int, data['genre'].split(',')))
-        #keep old cover file if not have the new one
-        if data['cover'] is not None:
+        print(data)
+        genre_ids = data['genre']
+        #check if data was null
+        if 'cover' not in request.FILES:
+            print('cover is null')
             data['cover'] = snippet.cover
         else:
             try:
@@ -214,7 +224,8 @@ class SongDetailView(APIView):
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST) 
         #keep song file if not have the new one
-        if data['song_file'] is not None:
+        if 'song_file' not in request.FILES:
+            print('song_file is null')
             data['song_file'] = snippet.song_file
         else:
             try:
@@ -223,13 +234,13 @@ class SongDetailView(APIView):
                     raise Exception("Invalid file type")
                 if song_file.size > 1024*1024*20:
                     raise Exception("File too large")
-                # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
-                #     raise Exception("Invalid file type")
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        print(data)
+        # print(data)
+        # print(type(genre_ids))
         serializer = SongSerializer(instance=snippet, data=request.data, context={'genre':genre_ids,'request': request})
         if serializer.is_valid():
+            print('valid')
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -242,6 +253,7 @@ class SongDetailView(APIView):
 
 class ListGenreView(APIView):
     def get(self, request, format=None):
+        # get all genres or genre by numbers songs in genre
         genres = Genre.objects.all()
         serializers = GenreSerializer(genres, many=True)
         return Response(serializers.data)

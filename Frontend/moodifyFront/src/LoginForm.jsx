@@ -3,16 +3,21 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BASE_URL } from "./App";
 
-function LoginForm(e) {
+function LoginForm(e, {setUserId}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   function login(e) {
     e.preventDefault();
+    
     axios
       .post(`${BASE_URL}/api/login/`, {
         username: username,
-        password: password,
+        password: password
+      }, {
+        headers: {
+          "Content-Type": "application/json"
+        }
       })
       .then((res) => {
         let token = res.data.token;
@@ -22,6 +27,7 @@ function LoginForm(e) {
         localStorage.setItem("username", username);
         localStorage.setItem("pk", pk);
         window.location.pathname = "/";
+        setUserId(pk);
       })
       .catch((err) => {
         console.log(err);
