@@ -39,6 +39,10 @@ class SongSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         genres = self.context['genre']
         song = Song.objects.create(**validated_data)
+        #change song_file name to song_id before saving
+        song.song_file.name = str(song.id)+ song.name + '.mp3'
+        song.cover.name = str(song.id)+ song.name + '.jpg'
+        song.save()
         for genre in genres:
             genre_obj = Genre.objects.filter(id=genre).first()
             song.genres.add(genre_obj)
