@@ -19,7 +19,7 @@ function AddSong({
         {/* songs */}
         <div className="p-5 w-85 mar_left">
             {/* Search box */}
-            <div className=" dflex">
+            <div className=" d-flex">
             <div className="log" onClick="">
                 <h2 className="mb-3">Upload</h2>
             </div>

@@ -1,41 +1,67 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {useHistory} from 'react-router-dom';
+import { BASE_URL } from "./App";
 
 function MainApp({
-  mood,
-  webCamera,
+  userId,
+  genres,
+  isLog,
   audioList,
-  apiAudioList,
   prev,
   next,
   playMusic,
-  // Webcam,
-  // fetchMusic,
 }) {
-  const tmp_id = 1;
+  const history = useHistory();
 
   const [username, setUsername] = useState("username");
-  // useEffect(() => {
-  //   if (!localStorage.getItem("token")) {
-  //     window.location.pathname = "/login";
-  //   } else {
-  //     setUsername(localStorage.getItem("username"));
-  //   }
-  // }, []);
-  // fetch songs from api
-  // const [songList, setSongList] = useState([]);
-  
-  // useEffect(() => {
-  //   try{
-  //     let response = axios.get("http//127.0.0.1:8000/api/songs/");
-  //     setSongList(response.data);
-  //     console.log('useEffect called');
-  //   }
-  //   catch(err){
-  //     console.log(err);
-  //   }
-    
-  // }, []);
+
+  const [songByGenre, setSongByGenre] = useState([]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      
+    } else {
+      setUsername(localStorage.getItem("username"));
+    }
+  }, []);
+
+  useEffect(() =>{
+    const fetchSongByGenre =async (g) => {
+      let genre_name = ((g.name).includes(" "))? (g.name).replace(" ", "+") : g.name;
+      let response = await axios.get(`${BASE_URL}/api/songs?genre_name=${genre_name}`);
+      console.log(`${BASE_URL}/api/songs?genre_name=${genre_name}`);
+        let songs = response.data;
+        // console.log("fetched songs: ");
+        // console.log(songs);
+        setSongByGenre(songByGenre => [...songByGenre, {
+          genre: g.name,
+          songs: songs.map((song) => {
+            return {
+              id: song.id,
+              name: song.title,
+              musicSrc: song.song_file,
+              artist:song.artist,
+              cover: song.cover,
+            };
+          })
+        } ]);
+    }
+    const fetchSongAllGenre = async() => {
+      if(genres){
+        genres.map((g) => {
+          fetchSongByGenre(g);
+        }
+        );
+        console.log("fetch all genre. Genres:", genres);
+      }
+      else{
+        console.log("no genres");
+      }
+    }
+    fetchSongAllGenre();
+  }, [genres]);
+
   return (
     <>
       {/* songs */}
@@ -43,45 +69,81 @@ function MainApp({
         {/* Search box */}
         <div className=" dflex">
           <input className="w80pt" type="search" placeholder="Search Music (in progress)" />
-          <div className="log" onClick="">
-            <h2 className="mb-3">Logout</h2>
-          </div>
+          {
+          (!isLog)?
+          (
+            <div className="log" onClick={() => {
+              history.push('/login');
+            }}>
+              <h2 className="mb-3">Login</h2>
+            </div>
+          ):
+          (
+           <></> 
+          )
+        }
+          
         </div>
 
         {/* song squares */}
-        <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, listen to {mood} songs</h2>
+        {
+          (isLog)?
+          (
+            <h2 className="mt-5 mb-3">Hi <span className="text-primary" id="username">{username}</span>, Listening is everything</h2>
+          ):
+          (
+            <h2 className="mt-5 mb-3">Hi, Listening is everything</h2>
+          )
+        }
+        
         <div className="d-flex mt-3 w-100 justify-content-between align-items-center">
           <div className="circle" onClick={() => prev()}>
             <i className="fas fa-arrow-left"></i>
           </div>
           {
-              // print songs
-              // audioList.map((song, index) => {
-              //   return (
-              //     <div
-              //       key={index}
-              //       className="song-square"
-              //       onClick={() => playMusic(song.id)}
-              //     >
-              //       <div className="song-square-img">
-              //         <img src={song.image} alt="song" />
-              //       </div>
-              //       <div className="song-square-info">
-              //         <div className="song-square-title">{song.title}</div>
-              //         <div className="song-square-artist">{song.artist}</div>
-              //       </div>
-              //     </div>
-              //   );
               audioList.map((song) => {
                 return (
-                  console.log(song),
+                  // console.log(song),
                   <div
                     key={song.id}
                     className="nav-btn"
                     onClick={() => playMusic(song)}
                   >
-                    <div>
+                    <div class="contain">
                       <img src={song.cover} className="mw-100" alt="song-cover" />
+                      {
+                          (isLog)?
+                          (
+                            <div class="overlay">
+                                <div id ="" className="mt-heart" >
+                                    <input id={song.id} type="checkbox"/> 
+                                    <label  for={song.id}></label> 
+                                </div>
+                                <button
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      color:"black"
+
+                                    }}
+                                  >
+                                  Add playlist
+                                  </button>
+                              </div>
+                          ):
+                          (
+                            <div class="overlay">
+                                <div
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      margin:"40px"
+                                    }}
+                                  >
+                                  <i className="fas fa-play-circle" style={{fontSize: "50px"}}>&#xE254;</i>
+                                  </div>     
+                              </div>
+                          )
+                        }
+                      
                     </div>
                     <div>
                       <p>{song.name.slice(0, 15)}</p>
@@ -90,109 +152,92 @@ function MainApp({
                 );
               })
             }
-          
+           <div id="Playlist1" class="modal fade">
+                                  <div class="modal-dialog">
+                                      <div class="modal-content">
+                                      <div class="modal-header">	
+                                         <h4 class="modal-title">Playlist Name</h4>					
+                                        <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                        <div className=" mt-3 w-100 justify-content-between align-items-center">
+                                          {
+                                            
+                                              audioList.map((song) => {
+                                                return (
+                                                  console.log(song),
+                                                  <div
+                                                    key={song.id}
+                                                    className="nav-btn1"
+                                                    onClick={() => playMusic(song)}
+                                                  >
+                                                    <div  className="w300 bg">
+                                                      <p  className="w200 ">{song.name.slice(0, 15)} </p>
+                                                      <hr></hr>
+                                                    </div>
+                                                  </div>
+                                                );
+                                              })
+                                            }
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div> 
 
           <div className="circle" onClick={() => next()}>
             <i className="fas fa-arrow-right"></i>
           </div>
         </div>
-
-       { /* Trending Songs  */ }
-        <div >
-        <h2 className="mt-5 mb-3">Trending Songs</h2>
-        </div>
-        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
-        <div className="circle" onClick={() => prev()}>
-            <i className="fas fa-arrow-left"></i>
-          </div>
         {
-        audioList.map((song) => {
-                return (
-                  console.log(song),
-                  <div
-                    key={song.id}
-                    className="nav-btn"
-                    onClick={() => playMusic(song)}
-                  >
-                    <div>
-                      <img src={song.cover} className="mw-100" alt="song-cover" />
-                    </div>
-                    <div>
-                      <p>{song.name.slice(0, 15)}</p>
-                    </div>
-                  </div>
-                );
-              })
-            }
-            <div className="circle" onClick={() => next()}>
-            <i className="fas fa-arrow-right"></i>
-          </div>
-        </div>
-        { /* Other Hits */ }
-        <div >
-        <h2 className="mt-5 mb-3">Other Hits</h2>
-        </div>
-        <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
-        <div className="circle" onClick={() => prev()}>
-            <i className="fas fa-arrow-left"></i>
-          </div>
-        {
-        audioList.map((song) => {
-                return (
-                  console.log(song),
-                  <div
-                    key={song.id}
-                    className="nav-btn"
-                    onClick={() => playMusic(song)}
-                  >
-                    <div>
-                      <img src={song.cover} className="mw-100" alt="song-cover" />
-                    </div>
-                    <div>
-                      <p>{song.name.slice(0, 15)}</p>
-                    </div>
-                  </div>
-                );
-              })
-            }
-            <div className="circle" onClick={() => next()}>
-            <i className="fas fa-arrow-right"></i>
-          </div>
-        </div>
-        
-        {/* webcam and list */}
-        {/* <h2 className="mt-5">Songs based on your mood</h2> */}
-        {/* <div className="d-flex justify-content-between mt-3 w-100"> */}
-          {/* list */}
-          {/* <div className="list">
-            {apiAudioList.map((song) => {
-              return (
-                <div
-                  key={song.id}
-                  className="listing text-center py-2 font-weight-bold"
-                  onClick={() => playMusic(song)}
-                >
-                  {song.name.slice(0, 35)}
+          songByGenre.map((item) => {       
+            return(
+              <div>
+              <div >
+              <h2 className="mt-5 mb-3">{item.genre} Songs</h2>
+              </div>
+              <div  className="d-flex mt-3 w-100 justify-content-between align-items-center">
+              <div className="circle" onClick={() => prev()}>
+                  <i className="fas fa-arrow-left"></i>
+              </div>
+              {
+                  item.songs.map((song) => {
+                      return (
+                        
+                        <div
+                          key={song.id}
+                          className="nav-btn"
+                          onClick={() => playMusic(song)}
+                        >
+                          <div className="contain">
+                            <img src={song.cover} className="mw-100" alt="song-cover" />
+                            <div class="overlay">
+                                <div
+                                    href="#Playlist1" data-toggle="modal" 
+                                    style={{   
+                                      margin:"40px"
+                                    }}
+                                  >
+                                  <i className="fas fa-play-circle" style={{fontSize: "50px"}}>&#xE254;</i>
+                                  </div>     
+                              </div>
+                          </div>
+                          <div>
+                            <p>{song.name.slice(0, 15)}</p>
+                          </div>
+                        </div>
+                        
+                      );
+                    })
+                  }
+                  <div className="circle" onClick={() => next()}>
+                  <i className="fas fa-arrow-right"></i>
                 </div>
-              );
-            })}
-          </div> */}
-
-          {/* webcam
-          <div id="cam-div">
-            <Webcam className="webcam" ref={webCamera} mirrored={true} />
-            <button onClick={() => fetchMusic()}>Moodify</button>
-          </div> */}
-
-          {/* mood indicator */}
-          {/* <div
-            id="mood-div"
-            className="d-flex justify-content-center align-items-center flex-column"
-          >
-            <p className="mb-3">You seem to be</p>
-            <p className="font-weight-bold m-0">{mood}</p>
-          </div> */}
-        {/* </div> */}
+              </div>
+              </div>
+            );
+          })
+        }
+       
+       
       </div>
     </>
   );

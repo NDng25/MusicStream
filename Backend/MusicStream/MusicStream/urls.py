@@ -19,11 +19,13 @@ from django.urls import path, include, re_path
 from django.conf.urls.static import static
 from django.views.static import serve
 from django.conf.urls import url
+from rest_framework.authtoken import views
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('api/', include('api.urls')),
+     path('api-token-auth', views.obtain_auth_token),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

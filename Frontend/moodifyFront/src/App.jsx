@@ -4,7 +4,7 @@ import "react-jinke-music-player/assets/index.css";
 import Webcam from "react-webcam";
 import axios from "axios";
 import Logo from "./assets/transparent_white.png";
-import { BrowserRouter, NavLink, Route } from "react-router-dom";
+import { BrowserRouter, NavLink, Route, useHistory } from "react-router-dom";
 import UserCard from "./UserCard";
 import SignupForm from "./SignupForm";
 import LoginForm from "./LoginForm";
@@ -13,22 +13,79 @@ import Playlist from "./Playlist";
 import AllSongs from "./AllSongs";
 import MyMusic from "./MyMusic";
 import Favourite from "./Favourite";
+import DetailPlaylist from "./DetailPlaylist";
 
 export const BASE_URL = "http://127.0.0.1:8000";
 
 
 function App() {
+ 
   // states
   const [audioList, setAudioList] = useState([]); //pagination array
 
   const [apiAudioList, setApiAudioList] = useState([]); //original array from api
-  const [apiAudioListCopy, setApiAudioListCopy] = useState([]); //original array from api -> copy
 
-  const [mood, setMood] = useState("");
+  const [apiAudioListCopy, setApiAudioListCopy] = useState([]); //original array from api -> copy
 
   const [audioInstance, setAudioInstance] = useState(null);
 
   const [currAudio, setCurrAudio] = useState([]);
+
+  const [isLog, setIsLoged] = useState(false);
+
+  const [genres, setGenres] = useState(null);
+  
+  const [userId, setUserId] = useState(localStorage.getItem("pk"));
+
+  const [playlistid, setPlaylist] = useState([]);
+  useEffect(() =>{
+    const fetchPlaylistbyId =async () => {
+      const user_id = localStorage.getItem("pk");
+      let response = await axios.get(`${BASE_URL}/api/playlist?user_id=${user_id}`);
+        console.log(`${BASE_URL}/api/playlist?user_id=${user_id}`);
+      let playlists = response.data;
+        setPlaylist(
+        playlists.map((playlist) => {
+            return {
+              id : playlist.id,
+              user: playlist.user,
+              name: playlist.name,
+              cover:playlist.cover,
+              songs: playlist.songs,
+            };
+         }),
+          
+        );
+    }
+    fetchPlaylistbyId();
+  }, []);
+  
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+     setIsLoged(false);
+    }
+    else setIsLoged(true);
+  }, []);
+  
+
+  //get genres from api
+  useEffect(() => {
+    const fetchGenres = async() => {
+      try {
+        let response = await axios.get(`${BASE_URL}/api/genres/`);
+        let genres = response.data;
+        console.log("Genres: ");
+        console.log(genres);
+        setGenres(genres);
+      }
+      catch (err) {
+        console.log(err);
+      }
+    }
+    fetchGenres();
+    console.log("Genres: ");
+    console.log(genres);
+  },[]);
 
 
   // refs
@@ -76,9 +133,10 @@ function App() {
   }, [apiAudioList, apiAudioListCopy]);
 
   function playMusic(song) {
-    // audioInstance.clear();
+    audioInstance.clear();
     setTimeout(() => {
-      setCurrAudio([...currAudio,song]);
+      // setCurrAudio([...currAudio,song]);
+      setCurrAudio([song]);
       console.log("playing music");
       console.log(song);
       audioInstance.play();
@@ -129,6 +187,7 @@ function App() {
     localStorage.clear();
     window.location.pathname = "/login";
   }
+ 
 
   return (
     <div >
@@ -136,7 +195,7 @@ function App() {
       <BrowserRouter>
         <div className="d-flex h-90">
           {/* menu */}
-          <div className="w-15 text-center pt-5 posi" id="menu">
+          <div className="w-15 text-center pt-5 position" id="menu">
             {/* logo */}
             <div>
               <img src={Logo} alt="logo" className="logo" />
@@ -164,7 +223,11 @@ function App() {
                   </div>
                 </div>
               </NavLink>
-              <NavLink to="/favourite/" activeClassName="active" exact>
+              {/* check login */}
+              {
+                (isLog)? (
+                  <>
+                       <NavLink to="/favourite/" activeClassName="active" exact>
                 <div>
                   <div>
                     <span>
@@ -198,7 +261,31 @@ function App() {
                   <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>
               
                   
-                   <div id="addPlaylist" class="modal fade">
+                   
+                </div>
+                  </>
+                ):
+                (
+                  <></>
+                )
+              }
+             
+              
+                
+            
+              <div onClick={() => logout()}>
+                <div>{localStorage.getItem("token") && "Logout"}</div>
+              </div>
+            </nav>
+
+            <div id="info">
+              <span>
+                <i className="far fa-copyright"></i>
+              </span>{" "}
+              Team Moodify
+            </div>
+          </div>
+          <div id="addPlaylist" class="modal fade">
                     <div class="modal-dialog">
                       <div class="modal-content">
                       <form>
@@ -208,7 +295,7 @@ function App() {
                       </div>
                       <div class="modal-body">					
                               <div class="form-group">
-                                <label>Your New Playlist Name</label>
+                                <p>Your New Playlist Name</p>
                                 <input type="text" class="form-control" required/>	
                                 </div>
                       </div>
@@ -219,27 +306,12 @@ function App() {
                       </div>
                     </div>
                   </div>  
-                </div>
-              
-                
-
-              <div onClick={() => logout()}>
-                <div>{localStorage.getItem("token") && "Logout"}</div>
-              </div>
-            </nav>
-
-            <div id="info">
-              <span>
-                <i className="far fa-copyright"></i>
-              </span>{" "}
-              Team Moodify 2020
-            </div>
-          </div>
 
           <Route path="/" exact>
             <MainApp
-              mood={mood}
-              webCamera={webCamera}
+              userId={userId}
+              genres={genres}
+              isLog={isLog}
               audioList={audioList}
               apiAudioList={apiAudioList}
               prev={prev}
@@ -251,7 +323,6 @@ function App() {
           </Route>
           <Route path="/allsongs" exact>
             <AllSongs
-              mood={mood}
               audioList={audioList}
               apiAudioList={apiAudioList}
               playMusic={playMusic}
@@ -263,7 +334,7 @@ function App() {
           </Route>
           <Route path="/mymusic" exact>
             <MyMusic
-            mood={mood}
+            userId={userId}
             audioList={audioList}
             // genreList={genreList}
             apiAudioList={apiAudioList}
@@ -272,7 +343,18 @@ function App() {
           </Route>
           <Route path="/playlist" >
             <Playlist
+            audioList={audioList}
+            apiAudioList={apiAudioList}
+            playMusic={playMusic}
+            userId={userId}
+            playlistid={playlistid}
             />
+          </Route>
+          <Route path="/detailplaylist">
+             <DetailPlaylist
+                userId={userId}
+                playlistid={playlistid}
+             />
           </Route>
 
           <Route path="/signup" exact>
