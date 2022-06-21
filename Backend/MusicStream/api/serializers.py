@@ -13,52 +13,23 @@ from musicapp.models import *
 from rest_framework import serializers
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email']
-
-# class RegisterSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField(
-#         required = True,
-#         validators = [UniqueValidator(queryset=User.objects.all())]
-#     )
-#     password = serializers.CharField(
-#         write_only = True, required = True, validators = [validate_password] )
-#     re_password = serializers.CharField(write_only=True, required=True)
-#     class Meta:
-#         model = User
-#         fields = ('username', 'password', 're_password', 'email')
-#         extra_kwargs = {'password': {'write_only': True}}
-#     def validate(self, attrs):
-#         if attrs['password'] != attrs['re_password']:
-#             raise serializers.ValidationError({"password": "Password fields didn't match."})
-#         return attrs
-#     def create(self, validated_data):
-#         user = User.objects.create(
-#             username = validated_data['username'],
-#             email = validated_data['email'],
-#         )
-#         user.set_password(validated_data['password'])
-#         user.save()
-#         return user
-
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     class Meta:
         model = Profile
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Genre
         fields = ['id', 'name']
 
 class SongSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=User.objects.all(), default=serializers.CurrentUserDefault())
-    genre = GenreSerializer(many=True,read_only=True)
+    genres = GenreSerializer(many=True,read_only=True)
     class Meta:
         model = Song
-        fields = ['id', 'title', 'artist', 'lyrics','year', 'genre', 'user', 'cover', 'song_file']
+        fields = ['id', 'title', 'artist', 'lyrics','year', 'genres', 'user', 'cover', 'song_file']
     
     def validate(self, data):
         if data['year'] < 0 or data['year'] > datetime.datetime.now().date().year:
@@ -68,9 +39,13 @@ class SongSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         genres = self.context['genre']
         song = Song.objects.create(**validated_data)
+        #change song_file name to song_id before saving
+        song.song_file.name = str(song.id)+ song.name + '.mp3'
+        song.cover.name = str(song.id)+ song.name + '.jpg'
+        song.save()
         for genre in genres:
             genre_obj = Genre.objects.filter(id=genre).first()
-            song.genre.add(genre_obj)
+            song.genres.add(genre_obj)
         return song
     
     def update(self, instance, validated_data):
@@ -80,13 +55,16 @@ class SongSerializer(serializers.ModelSerializer):
         instance.year = validated_data.get('year', instance.year)
         instance.cover = validated_data.get('cover', instance.cover)
         instance.song_file = validated_data.get('song_file', instance.song_file)
-        instance.genre.clear()
+        instance.genres.clear()
         genre_ids = self.context['genre']
+        print(genre_ids)
         for id in genre_ids:
             try:
                 genre_obj = Genre.objects.filter(id=id).first()
-                instance.genre.add(genre_obj)
+                print(genre_obj)
+                instance.genres.add(genre_obj)
             except Exception as e:
+                print('genre error')
                 raise serializers.ValidationError(str(e))
         instance.save()
         return instance
