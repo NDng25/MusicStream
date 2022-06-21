@@ -19,9 +19,7 @@ function MainApp({
   const [songByGenre, setSongByGenre] = useState([]);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      
-    } else {
+    if (localStorage.getItem("token")) {
       setUsername(localStorage.getItem("username"));
     }
   }, []);
@@ -68,7 +66,7 @@ function MainApp({
       <div className="p-5 w-85 mar_left">
         {/* Search box */}
         <div className=" dflex">
-          <input className="w80pt" type="search" placeholder="Search Music (in progress)" />
+          {/* <input className="w80pt" type="search" placeholder="Search Music (in progress)" /> */}
           {
           (!isLog)?
           (
@@ -152,37 +150,6 @@ function MainApp({
                 );
               })
             }
-           <div id="Playlist1" class="modal fade">
-                                  <div class="modal-dialog">
-                                      <div class="modal-content">
-                                      <div class="modal-header">	
-                                         <h4 class="modal-title">Playlist Name</h4>					
-                                        <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                    </div>
-                                        <div className=" mt-3 w-100 justify-content-between align-items-center">
-                                          {
-                                            
-                                              audioList.map((song) => {
-                                                return (
-                                                  console.log(song),
-                                                  <div
-                                                    key={song.id}
-                                                    className="nav-btn1"
-                                                    onClick={() => playMusic(song)}
-                                                  >
-                                                    <div  className="w300 bg">
-                                                      <p  className="w200 ">{song.name.slice(0, 15)} </p>
-                                                      <hr></hr>
-                                                    </div>
-                                                  </div>
-                                                );
-                                              })
-                                            }
-                                        </div>
-                                      </div>
-                                    </div>
-                                </div> 
-
           <div className="circle" onClick={() => next()}>
             <i className="fas fa-arrow-right"></i>
           </div>
@@ -236,7 +203,6 @@ function MainApp({
             );
           })
         }
-       
        
       </div>
     </>

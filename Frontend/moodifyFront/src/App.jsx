@@ -34,8 +34,7 @@ function App() {
 
   const [isLog, setIsLoged] = useState(false);
 
-  const [genres, setGenres] = useState(null);
-
+  const [genres, setGenres] = useState([]);
   const [userId, setUserId] = useState(localStorage.getItem("pk"));
 
   const [playlistid, setPlaylist] = useState([]);
@@ -388,9 +387,10 @@ function App() {
             <MyMusic
             userId={userId}
             audioList={audioList}
-            // genreList={genreList}
+            genreList={genres}
             apiAudioList={apiAudioList}
             playMusic={playMusic}
+            user_id={userId}
             />
           </Route>
           <Route path="/playlist" >
@@ -415,7 +415,7 @@ function App() {
           </Route>
 
           <Route path="/login" exact>
-            <LoginForm />
+            <LoginForm setUserId={setUserId}/>
           </Route>
         </div>
       </BrowserRouter>
