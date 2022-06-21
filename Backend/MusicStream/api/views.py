@@ -281,6 +281,8 @@ class RecentPlayedView(APIView):
     
 
 class PlaylistView(APIView):
+    parser_classes = [MultiPartParser, JSONParser]
+    
     def get(self, request,format=None):
         user_id = int(request.query_params.get('user_id'))
         if user_id:
@@ -293,18 +295,14 @@ class PlaylistView(APIView):
     def post(self, request, format=None):
         data = request.data
         user_id = request.POST.get('user_id')
-        song_id = request.POST.get('song_id')
         #create new playlist
-        if user_id and song_id:
-            user_id = int(user_id)
-            song_id = int(song_id)
+        if user_id:
             try:
                 user = User.objects.filter(id=user_id).first()
-                song = Song.objects.filter(id=song_id).first()
-                if user and song:
-                    playlist = Playlist(name=data['name'], user=user)
+                if user and validateSongCover(request=request):
+                    
+                    playlist = Playlist(name=data['name'], user=user, cover=data['cover'])
                     playlist.save()
-                    playlist.addSong(song)
                     created_playlist = Playlist.objects.filter(id=playlist.id).first()
                     serializer = PlaylistSerializer(created_playlist, context={'request':request})
                     return Response(serializer.data ,status=status.HTTP_200_OK)
@@ -320,6 +318,7 @@ class PlaylistView(APIView):
         user_id = request.POST.get('user_id')
         song_id = request.POST.get('song_id')
         playlist_id = request.POST.get('playlist_id')
+        print("user: "+str(user_id)+", song: "+str(song_id)+", playlist: "+str(playlist_id))
         user = User.objects.filter(id=user_id).first()
         playlist = Playlist.objects.filter(user=user, id=playlist_id).first()
         if playlist:
@@ -333,20 +332,22 @@ class PlaylistView(APIView):
                         playlist.songs.add(song)
                         playlist.save()
                     modified_playlist = Playlist.objects.filter(id=playlist.id).first()
-                    return Response(modified_playlist, status=status.HTTP_200_OK)
+                    serializer = PlaylistSerializer(modified_playlist, context={'request': request})
+                    return Response(serializer.data, status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Song does not found"},status=status.HTTP_400_BAD_REQUEST)
             else:
                 playlist.name = data['name']
                 playlist.save()
                 modified_playlist = Playlist.objects.filter(id=playlist.id).first()
-                return Response(modified_playlist, status=status.HTTP_200_OK)
+                serializer = PlaylistSerializer(modified_playlist, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Playlist does not found"},status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
-        user_id = request.POST.get('user_id')
-        playlist_id = request.POST.get('playlist_id')
+        user_id = request.data['user_id']
+        playlist_id = request.data['playlist_id']
         user = User.objects.filter(id=user_id).first()
         playlist = Playlist.objects.filter(user=user, id=playlist_id).first()
         if playlist:

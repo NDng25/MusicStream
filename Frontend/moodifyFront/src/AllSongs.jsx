@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {useHistory} from 'react-router-dom';
 import { BASE_URL } from "./App";
 
 function AllSongs({
@@ -15,6 +16,7 @@ function AllSongs({
   // fetchMusic,
   
 }) {
+  
   const [searchField, setSearchField] = useState("");
   const [allSongs, setAllSongs] = useState(audioList);
   useEffect(() => {
@@ -47,6 +49,7 @@ function AllSongs({
     else{
       setAllSongs(audioList);
     }
+    
   }, [searchField]);
 
   const [favs, setFavs] = useState([]);
@@ -152,7 +155,7 @@ function addSongFav(e, id){
                       </div>
                     </div>
                     <div  className="w300">
-                    <a className="" onclick="" title="Add to Playlist"> <i
+                    <a  onclick="" title="Add to Playlist"> <i
                             className="fas fa-ellipsis-h mg"></i>
                     </a>
                     </div>
