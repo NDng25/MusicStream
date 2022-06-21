@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {useHistory} from 'react-router-dom';
 import { BASE_URL } from "./App";
 
 function AllSongs({
@@ -14,6 +15,7 @@ function AllSongs({
   // fetchMusic,
   
 }) {
+  
   const [searchField, setSearchField] = useState("");
   const [allSongs, setAllSongs] = useState(audioList);
   useEffect(() => {
@@ -46,6 +48,7 @@ function AllSongs({
     else{
       setAllSongs(audioList);
     }
+    
   }, [searchField]);
 
   function handleChange(e){

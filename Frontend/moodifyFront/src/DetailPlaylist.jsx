@@ -10,6 +10,7 @@ function DetailPlaylist({
   audioList,
   apiAudioList,
   playlistid,
+  userId,
   prev,
   next,
   playMusic,
@@ -18,7 +19,7 @@ function DetailPlaylist({
 }) {
     const history = useHistory()
     const location = useLocation();
-    const state = location.state.playlistid;
+    const [state,setState] = useState(location.state.playlistid);
     const playlistname = location.state.playlistname;
     const playlistcover = location.state.playlistcover;
     //console.log(state)
@@ -49,9 +50,14 @@ function DetailPlaylist({
     const deletePlaylist = async (e, id) => {
       e.preventDefault();
       try {
-        let response = await axios.delete(`${BASE_URL}/api/playlist/${id}`);
+        let response = await axios.delete(`${BASE_URL}/api/playlist/`,{
+          data: {
+            user_id: userId,
+            playlist_id: id,
+          }
+        });
         console.log(response);
-        history.push("/playlist");
+         history.push("/playlist");
       }
       catch(err){
         console.log(err);

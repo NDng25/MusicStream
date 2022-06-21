@@ -50,7 +50,6 @@ function MyMusic({
   }, []);
 
   let postSong = async (e) => {
-    e.preventDefault();
     //create form data from data object
     let formData = new FormData();
     for (let key in data) {
@@ -64,16 +63,6 @@ function MyMusic({
       console.log(response.data);
       //close form
       console.log(formData);
-      //reset data
-      setData({
-        title: "",
-        artist: "",
-        genre: [],
-        year: new Date().getFullYear(),
-        cover: null,
-        song_file: null,
-        user: user_id,
-      });
       // history.push("/mymusic");
     }
     catch(err){
@@ -82,7 +71,7 @@ function MyMusic({
   }
 
   const editSong = async (e, song) => {
-    e.preventDefault();
+    //e.preventDefault();
     //create form data from data object
     let formData = new FormData();
     data['year'] = song.year;
@@ -115,7 +104,7 @@ function MyMusic({
   }
 
   const deleteSong = async (e, id) => {
-    e.preventDefault();
+    //e.preventDefault();
     try{
       let response = await axios.delete(`${BASE_URL}/api/songs/${id}/`);
       console.log(response);
@@ -170,6 +159,8 @@ const handleEdit = (song) => {
     user: user_id,
   });
 }
+ 
+
 
   return (
     <>
@@ -220,7 +211,7 @@ const handleEdit = (song) => {
                             </div>		  	
                     </div>
                     <div class="modal-footer">
-                            <input type="submit" class="btn btn-success" value="Add"/>
+                            <input type="submit" class="btn btn-success" value="Add" />
                     </div>
                    </form>
                       </div>

@@ -40,19 +40,20 @@ function App() {
   const [playlistid, setPlaylist] = useState([]);
 
   const [dataPlay, setDataplay] = useState({
-        user: userId,
+        user_id: userId,
         songs: [],
         name: "",
         cover: null,
   });
 
   const postPlaylist = async (e) => {
-    e.preventDefault();
-    //create form data from data object
     let formData = new FormData();
     for (let key in dataPlay) {
       formData.append(key, dataPlay[key]);
     }
+    
+    console.log(formData.get('user_id'));
+
     try{
       let response = await axios.post(`${BASE_URL}/api/playlist/`, formData, 
       {
@@ -64,8 +65,7 @@ function App() {
       
       //reset data
       setDataplay({
-        user: userId,
-        songs: [],
+        user_id: userId,
         name: "",
         cover: null,
       });
@@ -335,7 +335,7 @@ function App() {
           <div id="addPlaylist" class="modal fade">
                     <div class="modal-dialog">
                       <div class="modal-content">
-                      <form  onSubmit={() => postPlaylist()}>
+                      <form  onSubmit={(e) => postPlaylist(e)}>
                       <div class="modal-header">						
                               <h4 class="modal-title">Create Playlist</h4>
                               <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -368,6 +368,7 @@ function App() {
               prev={prev}
               next={next}
               playMusic={playMusic}
+              playlist={playlistid}
               // Webcam={Webcam}
               // fetchMusic={fetchMusic}
             />

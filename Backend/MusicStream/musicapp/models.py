@@ -51,7 +51,7 @@ class Favourite(models.Model):
 class Playlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    cover = models.ImageField(default='default.jpg', upload_to='media/songs')
+    cover = models.ImageField(default='default.jpg', upload_to='media/playlist')
     songs = models.ManyToManyField(Song, blank=True)
     def __str__(self):
         return f'{self.user.username} playlist {self.name}'

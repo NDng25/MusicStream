@@ -11,12 +11,15 @@ function MainApp({
   prev,
   next,
   playMusic,
+  playlist,
 }) {
   const history = useHistory();
 
   const [username, setUsername] = useState("username");
 
   const [songByGenre, setSongByGenre] = useState([]);
+
+  const [clickedId, setClickedId] = useState(null);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -60,6 +63,46 @@ function MainApp({
     fetchSongAllGenre();
   }, [genres]);
 
+  function addSongPlay(e, song_id, playlist_id){
+ 
+    const addPlay = async (song_id, playlist_id) => {
+      console.log(userId);
+      let formData = new FormData();
+      formData.append("user_id",userId);
+      formData.append("song_id",song_id);
+      formData.append("playlist_id", playlist_id);
+      try{
+        let res = await axios.put(`${BASE_URL}/api/playlist/`, formData);
+        console.log(res.data);
+      }
+      catch(err){
+        console.log(err);
+      }
+     
+    }
+  
+    const removeSongplaylist = async (id) => {
+      try{
+        let res = await axios.delete(`${BASE_URL}/api/playlist/`, {
+          data: {
+            user_id: userId,
+            song_id: id,
+          }
+        });
+        console.log(res.data);
+      }
+      catch(err){
+        console.log(err);
+      }
+    }
+  
+    // if(e.target.checked){
+      addPlay(song_id, playlist_id);
+    // }else{
+    //   removeSongplaylist(id);
+    // }
+  }
+       
   return (
     <>
       {/* songs */}
@@ -122,7 +165,8 @@ function MainApp({
                                     style={{   
                                       color:"black"
 
-                                    }}
+                                    }} 
+                                    onClick={() => setClickedId(song.id)}
                                   >
                                   Add playlist
                                   </button>
@@ -131,7 +175,7 @@ function MainApp({
                           (
                             <div class="overlay">
                                 <div
-                                    href="#Playlist1" data-toggle="modal" 
+                                     data-toggle="modal" 
                                     style={{   
                                       margin:"40px"
                                     }}
@@ -177,8 +221,7 @@ function MainApp({
                           <div className="contain">
                             <img src={song.cover} className="mw-100" alt="song-cover" />
                             <div class="overlay">
-                                <div
-                                    href="#Playlist1" data-toggle="modal" 
+                                <div data-toggle="modal" 
                                     style={{   
                                       margin:"40px"
                                     }}
@@ -203,7 +246,42 @@ function MainApp({
             );
           })
         }
-       
+       <div id="Playlist1" class="modal fade">
+                                  <div class="modal-dialog">
+                                      <div class="modal-content">
+                                      <div class="modal-header">	
+                                         <h4 class="modal-title">Playlist Name</h4>					
+                                        <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                        <div className=" mt-3 w-100 justify-content-between align-items-center">
+                                          {
+                                            
+                                              playlist.map((p) => {
+                                                return (
+                                                  console.log(p['songs']),
+                                                  <div
+                                                    key={p.id}
+                                                    className="nav-btn1"
+                                                  >
+                                                    <div  className="w300 bg" >
+                                                      <p  className="w200 ">{p.name} </p>
+                                                      <hr></hr>
+                                                    </div>
+                                                    <div  className="w300">
+                                                      <div id ="" className="mt-heart mg" >
+                                                          <input id={p.id} type="checkbox" defaultChecked={(p['songs'].find((i) => i===clickedId) !== undefined)?true:false} onClick={(e) => addSongPlay(e ,clickedId,p.id)}/> 
+                                                          <label  for={p.id}></label> 
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                );
+                                              })
+                                            }
+                                          
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div> 
       </div>
     </>
   );
