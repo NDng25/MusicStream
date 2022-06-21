@@ -18,13 +18,16 @@ function AllSongs({
   const [searchField, setSearchField] = useState("");
   const [allSongs, setAllSongs] = useState(audioList);
   useEffect(() => {
+    setAllSongs(audioList);
+  },[]);
+  useEffect(() => {
     const fetchSearchSong = async (query) => {
       try{
         let response = await axios.get(`${BASE_URL}/api/songs?search_field=title&query=${query}`);
         console.log("fetch search song");
         let songs = response.data;
         setAllSongs([]);
-        setAllSongs(songs.map(
+        const list = songs.map(
           (song) => {
             return {
               id: song.id,
@@ -35,7 +38,8 @@ function AllSongs({
               year: song.year,
             }
           }
-        ))  
+        );
+        setAllSongs(list);  
       }
       catch(err){
         console.log(err);
@@ -59,7 +63,7 @@ function AllSongs({
       console.log(favs);
     }
     fetchFav();
-  },[])
+  },[]);
 
 function addSongFav(e, id){
   // axios 
@@ -114,6 +118,7 @@ function addSongFav(e, id){
   }
   return (
     <>
+
       {/* songs */}
       <div className="p-5 w-85 mar_left">
         {/* Search box */}

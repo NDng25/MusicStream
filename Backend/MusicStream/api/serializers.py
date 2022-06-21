@@ -1,6 +1,7 @@
 from dataclasses import field
 import datetime
 import email
+import os
 from wsgiref.validate import validator
 from attr import fields
 from django.contrib.auth.models import User
@@ -40,8 +41,12 @@ class SongSerializer(serializers.ModelSerializer):
         genres = self.context['genre']
         song = Song.objects.create(**validated_data)
         #change song_file name to song_id before saving
-        song.song_file.name = str(song.id)+ song.name + '.mp3'
-        song.cover.name = str(song.id)+ song.name + '.jpg'
+        name, extension = os.path.splitext(song.song_file.name)
+        name = str(song.id)+ song.title
+        song.song_file.name = name + extension
+        c_name, c_extension = os.path.splitext(song.cover.name)
+        c_name = str(song.id)+ song.title
+        song.cover.name = c_name + c_extension
         song.save()
         for genre in genres:
             genre_obj = Genre.objects.filter(id=genre).first()
