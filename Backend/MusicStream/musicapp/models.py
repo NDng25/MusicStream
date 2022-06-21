@@ -2,10 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.conf import settings
-from django.core.files.base import ContentFile
+from django.db.models import Count
 
-# Create your models here.
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     displayName = models.CharField(max_length=50, blank=True, default=user.name)
@@ -17,7 +15,7 @@ class Profile(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=500, blank=True)
-    songs = models.ManyToManyField('musicapp.Song', blank=True)
+
     def __str__(self):
         return self.name
 
@@ -40,6 +38,7 @@ class Song(models.Model):
     def update_view_count(self):
         self.time_played += 1
         self.save()
+    
 
 #create model for favourite songs
 class Favourite(models.Model):

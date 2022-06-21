@@ -19,6 +19,7 @@ from argparse import Namespace
 from django.contrib.auth import authenticate
 from musicapp.models import *
 from .serializers import *
+from django.db.models import Count
 
 
 class UserDetailView(ViewSet):
@@ -253,8 +254,7 @@ class SongDetailView(APIView):
 
 class ListGenreView(APIView):
     def get(self, request, format=None):
-        # get all genres or genre by numbers songs in genre
-        genres = Genre.objects.all()
+        genres = Genre.objects.filter().annotate(num_songs=Count('song')).order_by('-num_songs')
         serializers = GenreSerializer(genres, many=True)
         return Response(serializers.data)
 
