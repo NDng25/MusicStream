@@ -30,6 +30,7 @@ class Song(models.Model):
     genres = models.ManyToManyField(Genre, blank=True)
     song_file = models.FileField(blank=True, default='default.mp3', upload_to='media/songs')
     upload_at = models.DateTimeField(auto_now_add=True)
+    # is_fav = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.title} by {self.artist}'
@@ -41,11 +42,19 @@ class Song(models.Model):
     
 
 #create model for favourite songs
-class Favourite(models.Model):
+class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    songs = models.ManyToManyField(Song, blank=True)
     def __str__(self):
         return f'{self.user.username} likes {self.song.title}'
+
+    def addSongFav(self, song):
+        self.songs.add(song)
+        self.save()
+    
+    def removeSong(self, song):
+        self.songs.remove(song)
+        self.save()
 
 #create model for Playlist
 class Playlist(models.Model):

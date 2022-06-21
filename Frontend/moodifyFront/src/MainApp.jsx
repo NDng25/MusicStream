@@ -27,6 +27,12 @@ function MainApp({
     }
   }, []);
 
+    const addSongFav = async(song) => {
+      
+
+    }
+
+
   useEffect(() =>{
     const fetchSongByGenre =async (g) => {
       let genre_name = ((g.name).includes(" "))? (g.name).replace(" ", "+") : g.name;
@@ -156,8 +162,8 @@ function MainApp({
                           (isLog)?
                           (
                             <div class="overlay">
-                                <div id ="" className="mt-heart" >
-                                    <input id={song.id} type="checkbox"/> 
+                                <div id ="" className="mt-heart"  >
+                                    <input id={song.id} type="checkbox" onClick={() => addSongFav()}/> 
                                     <label  for={song.id}></label> 
                                 </div>
                                 <button

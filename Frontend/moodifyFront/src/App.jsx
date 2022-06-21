@@ -12,7 +12,7 @@ import MainApp from "./MainApp";
 import Playlist from "./Playlist";
 import AllSongs from "./AllSongs";
 import MyMusic from "./MyMusic";
-import Favourite from "./Favourite";
+import Favorite from "./Favorite";
 import DetailPlaylist from "./DetailPlaylist";
 
 export const BASE_URL = "http://127.0.0.1:8000";
@@ -112,6 +112,29 @@ function App() {
         );
     }
     fetchPlaylistbyId();
+  }, []);
+
+  const [favoriteId, setFavorite] = useState([]);
+  useEffect(() =>{
+    const fetchFavoritebyId =async () => {
+      const user_id = localStorage.getItem("pk");
+      let response = await axios.get(`${BASE_URL}/api/favorite?user_id=${user_id}`);
+        console.log(`${BASE_URL}/api/favorite?user_id=${user_id}`);
+      let favorites = response.data;
+        setFavorite(
+          favorites.map((favorite) => {
+            return {
+              id : favorite.id,
+              user: favorite.user,
+              name: favorite.name,
+              cover:favorite.cover,
+              songs: favorite.songs,
+            };
+         }),
+          
+        );
+    }
+    fetchFavoritebyId();
   }, []);
   
   useEffect(() => {
@@ -281,13 +304,13 @@ function App() {
               {
                 (isLog)? (
                   <>
-                       <NavLink to="/favourite/" activeClassName="active" exact>
+                       <NavLink to="/favorite/" activeClassName="active" exact>
                 <div>
                   <div>
                     <span>
                       <i className="fas fa-heart"></i>
                     </span>{" "}
-                    Favourite
+                    Favorite
                   </div>
                 </div>
               </NavLink>
@@ -378,10 +401,16 @@ function App() {
               audioList={audioList}
               apiAudioList={apiAudioList}
               playMusic={playMusic}
+              userId={userId}
             />
           </Route>
-          <Route path="/favourite" >
-            <Favourite
+          <Route path="/favorite" >
+            <Favorite
+             audioList={audioList}
+             apiAudioList={apiAudioList}
+             playMusic={playMusic}
+             userId={userId}
+             favoriteId={favoriteId}
             />
           </Route>
           <Route path="/mymusic" exact>
