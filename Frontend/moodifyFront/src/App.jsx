@@ -69,7 +69,7 @@ function App() {
         name: "",
         cover: null,
       });
-      history.push("/playlist/");
+     // history.push("/playlist");
     }
     catch(err){
       console.log(err);
