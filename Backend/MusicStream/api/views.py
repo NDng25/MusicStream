@@ -1,6 +1,7 @@
 from cmath import exp
 from django.http import Http404
 from matplotlib.style import context
+from requests import delete
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import Response, APIView, status
@@ -61,6 +62,9 @@ class UserDetailView(ViewSet):
             user.set_password(data.password)
 
             user.save()
+            
+            fav = Favorite.objects.create(user=user)
+            fav.save()
 
             Token.objects.get_or_create(user=user)
 
@@ -308,7 +312,8 @@ class PlaylistView(APIView):
                     playlist.save()
                     playlist.addSong(song)
                     created_playlist = Playlist.objects.filter(id=playlist.id).first()
-                    return Response(created_playlist ,status=status.HTTP_200_OK)
+                    serializers = PlaylistSerializer(created_playlist, context={'request': request}, many=False)
+                    return Response(serializers.data ,status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Invalid id"},status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
@@ -356,6 +361,68 @@ class PlaylistView(APIView):
         else:
             return Response({"error": "Playlist does not found"}, status=status.HTTP_400_BAD_REQUEST)
 
+class FavoriteSongView(APIView):
+    #lay ra danh sach fav song
+     def get(self, request,format=None):
+        user_id = int(request.query_params.get('user_id'))
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+            favorites = Favorite.objects.filter(user=user).first()
+            fav_tracks = favorites.songs.all()
+            serializer = SongSerializer(fav_tracks, context={'request':request}, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid id"}, status=status.HTTP_400_BAD_REQUEST)
+    # tao fav song
+     def post(self, request, format=None):
+        data = request.data
+        user_id = request.POST.get('user_id')
+        song_id = request.POST.get('song_id')
+        print(user_id)
+        print(song_id)
+        #create new favorite
+        if user_id and song_id:
+            user_id = int(user_id)
+            song_id = int(song_id)
+            print(user_id)
+            print(song_id)
+            try:
+                user = User.objects.filter(id=user_id).first()
+                song = Song.objects.filter(id=song_id).first()
+                
+                if user and song:
+                    favorite = Favorite.objects.filter(user=user).first()
+                    if favorite:
+                        #
+                        favorite.addSongFav(song)
+                        created_favorite = Favorite.objects.filter(id = favorite.id).first()
+                        serializers = FavoriteSerializer(created_favorite, context={'request': request}, many=False) 
+                    else: 
+                        newFavorite = Favorite(user=user)
+                        newFavorite.save()
+                        newFavorite.addSongFav(song)
+                        created_favorite = Favorite.objects.filter(id = newFavorite.id).first()
+                        serializers = FavoriteSerializer(created_favorite, context={'request': request}, many=False)
+                    return Response(serializers.data ,status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Invalid id"},status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+     def delete(self, request, format=None):
+        user_id = request.data['user_id']
+        song_id = request.data['song_id']
+        try:
+            user = User.objects.filter(id=user_id).first()
+            song = Song.objects.filter(id=song_id).first()
+        except Exception as e:
+            return Response({"result: Missing required field"})
+        favorite = Favorite.objects.filter(user=user).first()   
+        favorite.removeSong(song)
+        return Response({"result": "Delete successfully"}, status=status.HTTP_200_OK)
+        
 class PlaylistDetailView(APIView):
     def get(self, request, pk, format=None):
         playlist = Playlist.objects.filter(id=pk).first()

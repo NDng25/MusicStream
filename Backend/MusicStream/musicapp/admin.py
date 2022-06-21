@@ -5,7 +5,7 @@ from musicapp.models import *
 admin.site.register(Profile)
 admin.site.register(Song)
 admin.site.register(Genre)
-admin.site.register(Favourite)
+admin.site.register(Favorite)
 admin.site.register(Playlist)
 admin.site.register(Recent)
 admin.site.site_header = 'MusicStream Admin'

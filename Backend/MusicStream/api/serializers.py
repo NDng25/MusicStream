@@ -91,11 +91,11 @@ class SongSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class FavouriteSerializer(serializers.ModelSerializer):
+class FavoriteSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    song = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    songs = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
-        model = Favourite
+        model = Favorite
         fields = '__all__'
 
 class PlaylistSerializer(serializers.ModelSerializer):

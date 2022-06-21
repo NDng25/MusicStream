@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { BASE_URL } from "./App"
 
 function AllSongs({
   mood,
   webCamera,
   audioList,
+  userId,
   apiAudioList,
   prev,
   next,
@@ -15,6 +17,64 @@ function AllSongs({
 }) {
   const [username, setUsername] = useState("username");
 
+  const [favs, setFavs] = useState([]);
+
+  useEffect(()=>{
+    const fetchFav = async () => {
+      let res = await axios.get(`${BASE_URL}/api/favorite?user_id=${userId}`);
+      let songs = res.data;
+      setFavs(songs.map((song) => song.id));
+      console.log(favs);
+    }
+    fetchFav();
+  },[])
+
+function addSongFav(e, id){
+  // axios 
+  // .post(`${BASE_URL}/api/favorite/`, {
+  //   user_id: 
+  //   song_id: song.id,
+  //   ,
+  // })
+  const addFav = async (id) => {
+    console.log(userId);
+    let formData = new FormData();
+    formData.append("user_id",userId);
+    formData.append("song_id",id);
+    try{
+      let res = await axios.post(`${BASE_URL}/api/favorite/`, formData);
+      console.log(res.data);
+    }
+    catch(err){
+      console.log(err);
+    }
+   
+  }
+
+  const removeFav = async (id) => {
+    // let formData = new FormData();
+    // formData.append("user_id",userId);
+    // formData.append("song_id",id);
+    try{
+      let res = await axios.delete(`${BASE_URL}/api/favorite/`, {
+        data: {
+          user_id: userId,
+          song_id: id,
+        }
+      });
+      console.log(res.data);
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+
+  if(e.target.checked){
+    addFav(id);
+  }else{
+    removeFav(id);
+  }
+}
     
   return (
     <>
@@ -51,12 +111,12 @@ function AllSongs({
                     </div>
                     <div  className="w300">
                       <div id ="" className="mt-heart mg" >
-                          <input id={song.id} type="checkbox"/> 
+                          <input id={song.id} type="checkbox" defaultChecked={(favs.find((i) => i===song.id) !== undefined)?true:false} onClick={(e) => addSongFav(e ,song.id)}/> 
                           <label  for={song.id}></label> 
                       </div>
                     </div>
                     <div  className="w300">
-                    <a claclassNamess="" onclick="" title="Add to Playlist"> <i
+                    <a className="" onclick="" title="Add to Playlist"> <i
                             className="fas fa-ellipsis-h mg"></i>
                     </a>
                     </div>
