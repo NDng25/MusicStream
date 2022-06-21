@@ -17,6 +17,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from argparse import Namespace
 from django.contrib.auth import authenticate
+from api.utils import validateSongCover, validateSongFile
 from musicapp.models import *
 from .serializers import *
 from django.db.models import Count
@@ -121,7 +122,7 @@ class SongFilter(DjangoFilterBackend):
             queryset = queryset.filter(id__in=recently_songs)
         elif request.query_params.get('search_field'):
             search_field = request.query_params.get('search_field')
-            if search_field not in search_filter_field:
+            if search_field not in search_filter_field: 
                 return super().filter_queryset(request, queryset, view)
             query = request.query_params.get('query')
             queryset = queryset.filter(**{search_field + '__icontains': query})
@@ -154,28 +155,9 @@ class ListSongsView(APIView):
         print(data)
         data['year'] = int(data['year'])
         user_id = int(data['user'])
-        try:
-            if request.data['cover'] is None:
-                raise Exception('File is null')
-            img = request.data['cover']
-            if img.content_type not in ['image/jpeg', 'image/png']:
-                raise Exception('File type not supported')
-            if img.size > 1024*1024*10:
-                raise Exception('File size too large')
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not validateSongCover(request) or not validateSongFile(request):
+            return Response({"error": "Invalid file"}, status=status.HTTP_400_BAD_REQUEST)
         
-        #check songs file is valid
-        try:
-            song_file = request.data['song_file']
-            if song_file.content_type not in ['audio/mpeg', 'audio/mp3']:
-                raise Exception("Invalid file type")
-            if song_file.size > 1024*1024*30:
-                raise Exception("File too large")
-            # if song_file.split('.')[-1] not in ['mp3', 'mpeg']:
-            #     raise Exception("Invalid file type")
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         data['user'] = User.objects.filter(id=user_id).first().id
         genre_list = request.POST.get('genre')
         # genre_list = list(map(int, genre_list.split(',').map(int)))
@@ -320,7 +302,8 @@ class PlaylistView(APIView):
                     playlist.save()
                     playlist.addSong(song)
                     created_playlist = Playlist.objects.filter(id=playlist.id).first()
-                    return Response(created_playlist ,status=status.HTTP_200_OK)
+                    serializer = PlaylistSerializer(created_playlist, context={'request':request})
+                    return Response(serializer.data ,status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Invalid id"},status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
@@ -378,4 +361,5 @@ class PlaylistDetailView(APIView):
         else:
             return Response({"error": "Playlist does not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        
+
+

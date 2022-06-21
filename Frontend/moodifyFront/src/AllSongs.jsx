@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { BASE_URL } from "./App";
 
 function AllSongs({
   mood,
@@ -13,16 +14,51 @@ function AllSongs({
   // fetchMusic,
   
 }) {
-  const [username, setUsername] = useState("username");
+  const [searchField, setSearchField] = useState("");
+  const [allSongs, setAllSongs] = useState(audioList);
+  useEffect(() => {
+    const fetchSearchSong = async (query) => {
+      try{
+        let response = await axios.get(`${BASE_URL}/api/songs?search_field=title&query=${query}`);
+        console.log("fetch search song");
+        let songs = response.data;
+        setAllSongs([]);
+        setAllSongs(songs.map(
+          (song) => {
+            return {
+              id: song.id,
+              name: song.title,
+              musicSrc: song.song_file,
+              artist:song.artist,
+              cover: song.cover,
+              year: song.year,
+            }
+          }
+        ))  
+      }
+      catch(err){
+        console.log(err);
+      }
+    }
+    if(searchField.length > 0){
+      fetchSearchSong(searchField);
+    }
+    else{
+      setAllSongs(audioList);
+    }
+  }, [searchField]);
 
-    
+  function handleChange(e){
+    setSearchField(e.target.value);
+    console.log(e.target.value);
+  }
   return (
     <>
       {/* songs */}
       <div className="p-5 w-85 mar_left">
         {/* Search box */}
         <div>
-          <input type="search" placeholder="Search Music (in progress)" />
+          <input type="search" placeholder="Search Music (in progress)" onChange={handleChange}/>
         </div>
 
         {/* song squares */}
@@ -31,7 +67,7 @@ function AllSongs({
        
           {
              
-              audioList.map((song) => {
+             allSongs.map((song) => {
                 return (
                   console.log(song),
                   <div

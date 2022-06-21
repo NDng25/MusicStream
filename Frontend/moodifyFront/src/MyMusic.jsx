@@ -42,6 +42,7 @@ function MyMusic({
           musicSrc: song.song_file,
           artist:song.artist,
           cover: song.cover,
+          year: song.year,
         };
       }));
     }
@@ -62,7 +63,7 @@ function MyMusic({
         },});
       console.log(response.data);
       //close form
-      
+      console.log(formData);
       //reset data
       setData({
         title: "",
@@ -73,7 +74,7 @@ function MyMusic({
         song_file: null,
         user: user_id,
       });
-      history.push("/mymusic");
+      // history.push("/mymusic");
     }
     catch(err){
       console.log(err);
@@ -84,6 +85,7 @@ function MyMusic({
     e.preventDefault();
     //create form data from data object
     let formData = new FormData();
+    data['year'] = song.year;
     for (let key in data) {
       formData.append(key, data[key]);
     }
@@ -173,21 +175,17 @@ const handleEdit = (song) => {
     <>
       {/* songs */}
       <div className="p-5 w-85 mar_left">
-        {/* Search box */}
-        <div>
-          <input type="search" placeholder="Search Music (in progress)" />
-        </div>
 
         {/* song squares */}
         <div className="dis">
             <h2 className="mt-5 mb-3">My music</h2>
             <a href="#addEmployeeModal" data-toggle="modal" class="button-63 mt-5 mb-3" role="button"><span class="text">Add Song</span></a>
           </div> 
-
+      
            <div id="addEmployeeModal" class="modal fade">
                     <div class="modal-dialog">
                       <div class="modal-content">
-                      <form onSubmit={() => postSong()}>
+                      <form onSubmit={(e) => postSong(e)}>
                      <div class="modal-header">						
                             <h4 class="modal-title">Add Song</h4>
                             <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
