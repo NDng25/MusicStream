@@ -308,7 +308,8 @@ class PlaylistView(APIView):
                     playlist.save()
                     playlist.addSong(song)
                     created_playlist = Playlist.objects.filter(id=playlist.id).first()
-                    return Response(created_playlist ,status=status.HTTP_200_OK)
+                    serializers = PlaylistSerializer(created_playlist, context={'request':request}, many=False)
+                    return Response(serializers.data ,status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Invalid id"},status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:

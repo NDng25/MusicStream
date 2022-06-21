@@ -21,6 +21,7 @@ export const BASE_URL = "http://127.0.0.1:8000";
 function App() {
  
   // states
+  const history = useHistory()
   const [audioList, setAudioList] = useState([]); //pagination array
 
   const [apiAudioList, setApiAudioList] = useState([]); //original array from api
@@ -34,10 +35,64 @@ function App() {
   const [isLog, setIsLoged] = useState(false);
 
   const [genres, setGenres] = useState(null);
-  
+
   const [userId, setUserId] = useState(localStorage.getItem("pk"));
 
   const [playlistid, setPlaylist] = useState([]);
+
+  const [dataPlay, setDataplay] = useState({
+        user: userId,
+        songs: [],
+        name: "",
+        cover: null,
+  });
+
+  const postPlaylist = async (e) => {
+    e.preventDefault();
+    //create form data from data object
+    let formData = new FormData();
+    for (let key in dataPlay) {
+      formData.append(key, dataPlay[key]);
+    }
+    try{
+      let response = await axios.post(`${BASE_URL}/api/playlist/`, formData, 
+      {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },});
+      console.log(response.data);
+      //close form
+      
+      //reset data
+      setDataplay({
+        user: userId,
+        songs: [],
+        name: "",
+        cover: null,
+      });
+      history.push("/playlist/");
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+
+  const onImageChange = (e) => {
+    const reader = new FileReader();
+    let newData = {...dataPlay };
+    if(e.target.files && e.target.files[0]){
+      newData['cover'] = e.target.files[0];
+    
+    }
+    setDataplay(newData);
+  }
+  const handleChange = ({ currentTarget: input }) => {
+    let newData = {...dataPlay };
+    newData[input.name] = input.value;
+    
+    setDataplay(newData);
+};
+
   useEffect(() =>{
     const fetchPlaylistbyId =async () => {
       const user_id = localStorage.getItem("pk");
@@ -258,10 +313,7 @@ function App() {
                 </div>
               </NavLink>
               <div className="" >
-                  <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>
-              
-                  
-                   
+                  <a href="#addPlaylist" data-toggle="modal" class="button-64" role="button"><span class="text">New Playlist</span></a>   
                 </div>
                   </>
                 ):
@@ -269,10 +321,6 @@ function App() {
                   <></>
                 )
               }
-             
-              
-                
-            
               <div onClick={() => logout()}>
                 <div>{localStorage.getItem("token") && "Logout"}</div>
               </div>
@@ -288,7 +336,7 @@ function App() {
           <div id="addPlaylist" class="modal fade">
                     <div class="modal-dialog">
                       <div class="modal-content">
-                      <form>
+                      <form  onSubmit={() => postPlaylist()}>
                       <div class="modal-header">						
                               <h4 class="modal-title">Create Playlist</h4>
                               <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -296,11 +344,15 @@ function App() {
                       <div class="modal-body">					
                               <div class="form-group">
                                 <p>Your New Playlist Name</p>
-                                <input type="text" class="form-control" required/>	
-                                </div>
+                                <input type="text" id= "name" name="name" class="form-control" value={dataPlay['name']} onChange={(e) => handleChange(e)} required/>	
+                              </div>
+                              <div class="form-group">
+                                <label>Cover</label>
+                                <input type="file" id ="cover" name="cover" accept="image/*" onChange={(e) => onImageChange(e)} />
+                            </div>
                       </div>
                       <div class="modal-footer">
-                              <input type="submit" class="btn btn-success" value="Create Playlist"/>
+                              <input type="submit" class="btn btn-success" value="Create Playlist" />
                       </div>
                     </form>
                       </div>
@@ -354,6 +406,7 @@ function App() {
              <DetailPlaylist
                 userId={userId}
                 playlistid={playlistid}
+                playMusic={playMusic}
              />
           </Route>
 

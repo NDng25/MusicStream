@@ -56,7 +56,7 @@ function AllSongs({
                       </div>
                     </div>
                     <div  className="w300">
-                    <a claclassNamess="" onclick="" title="Add to Playlist"> <i
+                    <a  onclick="" title="Add to Playlist"> <i
                             className="fas fa-ellipsis-h mg"></i>
                     </a>
                     </div>
