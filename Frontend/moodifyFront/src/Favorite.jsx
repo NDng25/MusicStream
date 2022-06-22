@@ -72,7 +72,7 @@ function Favorite({
                      <img src={song.cover} className="w80" alt="song-cover" />
                    </div>
                    <div className="w300" >
-                     <p  className="w100 mg" >{song.artist} </p>
+                     <p  className="w100 mg" >{song.name} </p>
                    </div>
                    <div  className="w300" >
                     {/* <p  className="w100 mg" >{song.artist} </p> */}

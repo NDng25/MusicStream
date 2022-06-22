@@ -159,11 +159,11 @@ function MainApp({
         }
         
         <div className="d-flex mt-3 w-100 justify-content-between align-items-center">
-          <div className="circle" >{/*onClick={() => prev()}*/}
+          <div className="circle" onClick={() => prev()}>{/*onClick={() => prev()}*/}
             <i className="fas fa-arrow-left"></i>
           </div>
           {
-              recentSongs.map((song) => {
+              audioList.map((song) => {
                 return (
                   // console.log(song),
                   <div
@@ -213,7 +213,7 @@ function MainApp({
                 );
               })
             }
-          <div className="circle" >{/*onClick={() => next()}*/}
+          <div className="circle" onClick={() => next()}>{/*onClick={() => next()}*/}
             <i className="fas fa-arrow-right"></i>
           </div>
         </div>
@@ -272,7 +272,7 @@ function MainApp({
                                          <h4 class="modal-title">Playlist Name</h4>					
                                         <button  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                     </div>
-                                        <div className=" mt-3 w-100 justify-content-between align-items-center">
+                                        <div className=" mt-3 w-100 justify-content-between align-items-center" >
                                           {
                                             
                                               playlist.map((p) => {

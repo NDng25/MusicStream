@@ -147,18 +147,13 @@ class ListSongsView(APIView):
         paginator = self.pagination_class()
         filtered = SongFilter().filter_queryset(request, songs, self)
         result = paginator.paginate_queryset(filtered, request)
-        # if result.exists():
         serializer = SongSerializer(result, context={'request': request},many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        # else:
-        #     return Response({"error": "No songs found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        # permission_classes = (permissions.IsAuthenticated,)
     def post(self, request, format=None):
         data = request.data
         print(data)
         data['year'] = int(data['year'])
-        user_id = int(data['user'])
+        user_id = int(request.POST.get('user'))
         if not validateSongCover(request) or not validateSongFile(request):
             return Response({"error": "Invalid file"}, status=status.HTTP_400_BAD_REQUEST)
         

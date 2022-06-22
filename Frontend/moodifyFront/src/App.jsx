@@ -206,7 +206,7 @@ function App() {
 
 
   useEffect(() => {
-    setAudioList(apiAudioList.slice(0, 6));
+    setAudioList(apiAudioList.slice(0, 8));
   }, [apiAudioList, apiAudioListCopy]);
 
   function playMusic(song) {
