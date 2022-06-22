@@ -48,9 +48,7 @@ function Playlist({
                               //console.log(song),
                               <div
                                 key={song.id}
-                                className="nav-btn1"
-                                style={{height: "100px"}}
-                                onClick={() => playMusic(song)}
+                                className="nav-btn2"
                               >
                                 <div>
                                   <img src={song.cover} className="w80" alt="song-cover" />
@@ -76,9 +74,8 @@ function Playlist({
                                                   <div
                                                     key={song.id}
                                                     className="nav-btn1"
-                                                    onClick={() => playMusic(song)}
                                                   >
-                                                    <div  className="w300 bg">
+                                                    <div  className="w300 bg" >
                                                       <p  className="w200 ">{song.name.slice(0, 15)} </p>
                                                       <hr></hr>
                                                     </div>
@@ -115,12 +112,14 @@ function Playlist({
                    <div>
                      <img src={playlist.cover} className="w80" alt="song-cover" />
                    </div>
-                   <div className="w300" >
+                   <div className="w300" style={{padding:"30px"}}>
                    <p><Link className="w100 mg"
                      to={{
                       pathname:'/detailplaylist',
                       state: {
-                       playlistid: playlist.id
+                       playlistid: playlist.id,
+                       playlistname : playlist.name,
+                       playlistcover : playlist.cover
                       }
                      }}
                         >{playlist.name}</Link></p>
