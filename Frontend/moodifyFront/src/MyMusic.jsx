@@ -92,8 +92,8 @@ function MyMusic({
         artist: "",
         genre: [],
         year: new Date().getFullYear(),
-        cover: '',
-        song_file: '',
+        cover: null,
+        song_file: null,
         user: user_id,
       });
       // history.push("/mymusic");

@@ -109,9 +109,6 @@ function DetailPlaylist({
                      <p  className="w100 mg" >{song.artist} </p>
                    </div>
                    <div  className="w300" >
-                   <div  className="w300">
-                      <i className="fa fa-remove w100 mg" style={{marginTop: "35px"}}></i>
-                    </div>
                    </div>
                  </div>
                );

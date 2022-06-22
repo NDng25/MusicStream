@@ -65,7 +65,7 @@ function Favorite({
                  console.log(song),
                  <div
                    key={song.id}
-                   className="nav-btn1"
+                   className="nav-btn2"
                    onClick={() => playMusic(song)}
                  >
                    <div>

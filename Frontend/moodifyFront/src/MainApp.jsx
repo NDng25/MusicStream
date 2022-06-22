@@ -21,16 +21,32 @@ function MainApp({
 
   const [clickedId, setClickedId] = useState(null);
 
+  const [recentSongs, setRecentSongs] = useState([]);
+
   useEffect(() => {
     if (localStorage.getItem("token")) {
       setUsername(localStorage.getItem("username"));
     }
   }, []);
 
-    const addSongFav = async(song) => {
-      
-
+  useEffect(() => {
+    const fetchRecentSongs = async () => {
+      let res = await axios.get(`${BASE_URL}/api/recently_played?user_id=${userId}`);
+      let songs = res.data;
+      setRecentSongs(songs.map(
+        (song) => {
+          return {
+            id: song.id,
+            name: song.title,
+            musicSrc: song.song_file,
+            artist:song.artist,
+            cover: song.cover,
+          };
+        }
+      ));
     }
+    fetchRecentSongs();
+  }, []);
 
 
   useEffect(() =>{
@@ -115,7 +131,6 @@ function MainApp({
       <div className="p-5 w-85 mar_left">
         {/* Search box */}
         <div className=" dflex">
-          {/* <input className="w80pt" type="search" placeholder="Search Music (in progress)" /> */}
           {
           (!isLog)?
           (
@@ -144,11 +159,11 @@ function MainApp({
         }
         
         <div className="d-flex mt-3 w-100 justify-content-between align-items-center">
-          <div className="circle" onClick={() => prev()}>
+          <div className="circle" >{/*onClick={() => prev()}*/}
             <i className="fas fa-arrow-left"></i>
           </div>
           {
-              audioList.map((song) => {
+              recentSongs.map((song) => {
                 return (
                   // console.log(song),
                   <div
@@ -162,14 +177,12 @@ function MainApp({
                           (isLog)?
                           (
                             <div class="overlay">
-                                <div id ="" className="mt-heart"  >
-                                    <input id={song.id} type="checkbox" onClick={() => addSongFav()}/> 
-                                    <label  for={song.id}></label> 
-                                </div>
+                                
                                 <button
                                     href="#Playlist1" data-toggle="modal" 
                                     style={{   
-                                      color:"black"
+                                      color:"black",
+                                      marginTop: "45px"
 
                                     }} 
                                     onClick={() => setClickedId(song.id)}
@@ -200,7 +213,7 @@ function MainApp({
                 );
               })
             }
-          <div className="circle" onClick={() => next()}>
+          <div className="circle" >{/*onClick={() => next()}*/}
             <i className="fas fa-arrow-right"></i>
           </div>
         </div>
@@ -274,7 +287,7 @@ function MainApp({
                                                       <hr></hr>
                                                     </div>
                                                     <div  className="w300">
-                                                      <div id ="" className="mt-heart mg" >
+                                                      <div id ="" className="mt-heart" >
                                                           <input id={p.id} type="checkbox" defaultChecked={(p['songs'].find((i) => i===clickedId) !== undefined)?true:false} onClick={(e) => addSongPlay(e ,clickedId,p.id)}/> 
                                                           <label  for={p.id}></label> 
                                                       </div>

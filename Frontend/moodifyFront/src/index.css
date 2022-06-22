@@ -683,3 +683,11 @@ label{
 .OnFormCenter{
     margin-left: 500px;
 }
+.w-h{
+    width: 100px;
+    height: 100px;
+}
+.w-h-pt{
+  width: 100%;
+  height: 100%;
+}

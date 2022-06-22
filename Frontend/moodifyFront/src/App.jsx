@@ -210,7 +210,15 @@ function App() {
   }, [apiAudioList, apiAudioListCopy]);
 
   function playMusic(song) {
+    const addRecentPlay = async ()=>{
+      let formData = new FormData();
+      formData.append("user_id", userId);
+      formData.append("song_id", song.id);
+      let res = await axios.post(`${BASE_URL}/api/recently_played/`,formData);
+      console.log(res);
+    }
     audioInstance.clear();
+    // addRecentPlay();
     setTimeout(() => {
       // setCurrAudio([...currAudio,song]);
       setCurrAudio([song]);
@@ -218,6 +226,7 @@ function App() {
       console.log(song);
       audioInstance.play();
     }, 300);
+
   }
 
   function reverse(arr = [], l, r) {

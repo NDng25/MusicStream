@@ -175,6 +175,7 @@ class ListSongsView(APIView):
 
 
 class SongDetailView(APIView):
+    parser_classes = [MultiPartParser]
     """
     Retrieve, update or delete a song.
     """
@@ -229,7 +230,7 @@ class SongDetailView(APIView):
         if serializer.is_valid():
             print('valid')
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status= status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
@@ -249,11 +250,12 @@ class RecentPlayedView(APIView):
     def get(seft, request, format=None):
         user_id = int(request.query_params.get('user_id'))
         user = User.objects.filter(id=user_id).first()
-        recently_songs = Recent.objects.filter(user=user).order_by('-played_at')[:10]
-        if recently_songs.exists():
-            for item in recently_songs:
-                item = item.song
-            serializer = SongSerializer(recently_songs, context={'request': request}, many=True)
+        recently = Recent.objects.filter(user=user).distinct().order_by('-played_at')[:10]
+        if recently.exists():
+            recent_songs = []
+            for item in recently:
+                recent_songs.append(item.song)
+            serializer = SongSerializer(recent_songs, context={'request': request}, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No songs found"}, status=status.HTTP_404_NOT_FOUND)
@@ -261,14 +263,14 @@ class RecentPlayedView(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        user_id = int(data['user'])
-        song_id = int(data['song'])
+        user_id = request.POST.get('user_id')
+        song_id = request.POST.get('song_id')
         user = User.objects.filter(id=user_id).first()
         song = Song.objects.filter(id=song_id).first()
         if user and song:
             recent = Recent.objects.filter(user=user, song=song).first()
             if recent:
-                recent.played_time = datetime.now()
+                recent.played_time = datetime.date.today()
                 recent.save()
             else:
                 recent = Recent(user=user, song=song)
